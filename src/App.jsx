@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import html2pdf from "html2pdf.js";
 
 const CHECKLIST_DATA = [
   {"sl":1,"room":"Drawing Room","desc":"Main Door - Polish & Finish","expected":"Smooth finish, no scratches, uniform gloss"},
@@ -533,12 +534,7 @@ function generateReportHTML(states, data, inspectorName, flatNumber, projectName
       </div>`;
   }
 
-  return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Flat Handover Report</title>
-    <style>
-      @media print { body { margin: 0; } @page { margin: 14mm; } }
-      body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #18181b; margin: 0; padding: 24px; }
-    </style></head><body>
-    <div style="max-width:1000px;margin:0 auto;">
+  return `<div style="max-width:1000px;margin:0 auto;padding:24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#18181b;">
       <div style="text-align:center;margin-bottom:32px;padding-bottom:24px;border-bottom:3px solid #18181b;">
         <h1 style="margin:0;font-size:26px;letter-spacing:-0.5px;">🏠 Flat Handover Inspection Report</h1>
         <p style="margin:8px 0 0;color:#71717a;font-size:14px;">Generated on ${new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</p>
@@ -601,8 +597,7 @@ function generateReportHTML(states, data, inspectorName, flatNumber, projectName
           <p style="font-size:13px;font-weight:600;margin:8px 0 0;">________________</p>
         </div>
       </div>
-    </div>
-  </body></html>`;
+    </div>`;
 }
 
 // ── Report Modal ──
@@ -617,19 +612,36 @@ function ReportModal({ onClose, states }) {
   const completed = CHECKLIST_DATA.filter(i => states[i.sl]?.status).length;
   const failed = CHECKLIST_DATA.filter(i => states[i.sl]?.status === "fail").length;
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     setGenerating(true);
-    setTimeout(() => {
-      const html = generateReportHTML(states, null, inspectorName, flatNumber, projectName, inspectionDate);
-      const blob = new Blob([html], { type: "text/html" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `Flat_Handover_Report_${flatNumber || "Draft"}_${inspectionDate}.html`;
-      a.click();
-      URL.revokeObjectURL(url);
+    try {
+      const htmlContent = generateReportHTML(states, null, inspectorName, flatNumber, projectName, inspectionDate);
+
+      const container = document.createElement("div");
+      container.style.position = "fixed";
+      container.style.left = "-9999px";
+      container.style.top = "0";
+      container.style.width = "1000px";
+      container.style.background = "#fff";
+      container.innerHTML = htmlContent;
+      document.body.appendChild(container);
+
+      const filename = `Flat_Handover_Report_${flatNumber || "Draft"}_${inspectionDate}.pdf`;
+      await html2pdf().set({
+        margin: [10, 10, 10, 10],
+        filename,
+        image: { type: "jpeg", quality: 0.95 },
+        html2canvas: { scale: 2, useCORS: true, width: 1000, windowWidth: 1000 },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+      }).from(container).save();
+
+      document.body.removeChild(container);
+    } catch (err) {
+      console.error("PDF generation failed:", err);
+    } finally {
       setGenerating(false);
-    }, 600);
+    }
   };
 
   const inputStyle = {
@@ -712,7 +724,7 @@ function ReportModal({ onClose, states }) {
             transition: "all 0.2s ease",
           }}
         >
-          {generating ? "⏳ Generating..." : "📄 Download Report"}
+          {generating ? "⏳ Generating PDF..." : "📄 Download PDF Report"}
         </button>
 
         <button
