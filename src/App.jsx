@@ -135,7 +135,29 @@ const CHECKLIST_DATA = [
   {"sl":132,"room":"General","desc":"Skirting Tiles - Fixing","expected":"Firm fixing, no damage or gaps. Check all skirting edges"},
   {"sl":133,"room":"General","desc":"Hollow Spots - Tiles/Plaster","expected":"No hollow sounds when tapped. Tap test all areas"},
   {"sl":134,"room":"General","desc":"Door Stoppers - Functionality","expected":"All stoppers present and functional. Check all doors"},
-  {"sl":135,"room":"General","desc":"Car Park/Common Area","expected":"Clean, proper markings, no damage. Visual inspection"}
+  {"sl":135,"room":"General","desc":"Car Park/Common Area","expected":"Clean, proper markings, no damage. Visual inspection"},
+  {"sl":136,"room":"Kids Bathroom","desc":"Tiles - Breakage/Missing","expected":"No broken, chipped, or missing tiles. Full coverage inspection"},
+  {"sl":137,"room":"Kids Bathroom","desc":"Tiles - Evenness/Level","expected":"Flush surface, no lippage (max 1mm difference). Use level tool"},
+  {"sl":138,"room":"Kids Bathroom","desc":"Wash Basin - Fixing & Stability","expected":"Firm fixing, no movement or flexing. Apply pressure test"},
+  {"sl":139,"room":"Kids Bathroom","desc":"Commode - Fixing & Condition","expected":"Firm fixing to floor, no movement, no scratches. Apply pressure test"},
+  {"sl":140,"room":"Kids Bathroom","desc":"Bathroom - Slope/Drainage","expected":"Proper slope for drainage, no water pooling. Check with water test"},
+  {"sl":141,"room":"Kids Bathroom","desc":"Ventilation - Exhaust Fan","expected":"Functional, proper suction, quiet operation. Test for 2 minutes"},
+  {"sl":142,"room":"Kids Bathroom","desc":"Geyser - Leakage & Condition","expected":"No leaks at connections or tank. Inspect for 5 minutes"},
+  {"sl":143,"room":"Kids Bathroom","desc":"Bathroom - Taps/Faucets","expected":"All taps functional, smooth operation, no leaks. Test all taps"},
+  {"sl":144,"room":"Maid Room","desc":"Door - Scratches/Paint","expected":"Clean finish, no paint drips or marks. Inspect entire door surface"},
+  {"sl":145,"room":"Maid Room","desc":"Door - Gap/Alignment","expected":"Max 3mm gap, door aligned properly. Check all sides"},
+  {"sl":146,"room":"Maid Room","desc":"Flooring - Tiles","expected":"No broken or chipped tiles, even surface. Full coverage inspection"},
+  {"sl":147,"room":"Maid Room","desc":"Paint - Walls & Ceiling","expected":"Even coating, no patchy areas, correct color. Inspect all surfaces"},
+  {"sl":148,"room":"Maid Room","desc":"Electrical - Switches & Sockets","expected":"All switches functional and secure. Test each switch"},
+  {"sl":149,"room":"Maid Room","desc":"Ventilation / Window","expected":"Proper ventilation, window opens/closes smoothly. Test mechanism"},
+  {"sl":150,"room":"Maid Bathroom","desc":"Tiles - Breakage/Missing","expected":"No broken, chipped, or missing tiles. Full coverage inspection"},
+  {"sl":151,"room":"Maid Bathroom","desc":"Tiles - Evenness/Level","expected":"Flush surface, no lippage (max 1mm difference). Use level tool"},
+  {"sl":152,"room":"Maid Bathroom","desc":"Wash Basin - Fixing & Stability","expected":"Firm fixing, no movement or flexing. Apply pressure test"},
+  {"sl":153,"room":"Maid Bathroom","desc":"Commode - Fixing & Condition","expected":"Firm fixing to floor, no movement, no scratches. Apply pressure test"},
+  {"sl":154,"room":"Maid Bathroom","desc":"Bathroom - Slope/Drainage","expected":"Proper slope for drainage, no water pooling. Check with water test"},
+  {"sl":155,"room":"Maid Bathroom","desc":"Ventilation - Exhaust Fan","expected":"Functional, proper suction, quiet operation. Test for 2 minutes"},
+  {"sl":156,"room":"Maid Bathroom","desc":"Geyser - Leakage & Condition","expected":"No leaks at connections or tank. Inspect for 5 minutes"},
+  {"sl":157,"room":"Maid Bathroom","desc":"Bathroom - Taps/Faucets","expected":"All taps functional, smooth operation, no leaks. Test all taps"}
 ];
 
 const ROOM_ICONS = {
@@ -146,14 +168,27 @@ const ROOM_ICONS = {
   "Guest Bedroom": "🛌",
   "Guest Bathroom": "🚰",
   "Kids Room": "🧒",
+  "Kids Bathroom": "🛁",
   "Common Bathroom": "🚻",
+  "Maid Room": "🧹",
+  "Maid Bathroom": "🪣",
   "General": "🏠",
 };
 
 const ROOM_ORDER = [
   "Drawing Room", "Kitchen", "Master Bedroom", "Master Bathroom",
-  "Guest Bedroom", "Guest Bathroom", "Kids Room", "Common Bathroom", "General"
+  "Guest Bedroom", "Guest Bathroom", "Kids Room", "Kids Bathroom",
+  "Common Bathroom", "Maid Room", "Maid Bathroom", "General"
 ];
+
+// Rooms that can be toggled on/off based on unit layout
+const OPTIONAL_ROOMS = [
+  "Guest Bedroom", "Guest Bathroom", "Kids Room", "Kids Bathroom",
+  "Common Bathroom", "Maid Room", "Maid Bathroom"
+];
+// New rooms added — disabled by default until user opts in
+const NEW_OPTIONAL_ROOMS = ["Kids Bathroom", "Maid Room", "Maid Bathroom"];
+const DEFAULT_ENABLED_ROOMS = new Set(ROOM_ORDER.filter(r => !NEW_OPTIONAL_ROOMS.includes(r)));
 
 function groupByRoom(data) {
   const grouped = {};
@@ -453,11 +488,12 @@ function RoomNav({ rooms, states, data, activeRoom, onSelect }) {
 }
 
 // ── Report Generator ──
-function generateReportHTML(states, data, inspectorName, flatNumber, projectName, inspectionDate) {
-  const grouped = groupByRoom(CHECKLIST_DATA);
+function generateReportHTML(states, flatNumber, inspectionDate, enabledRooms) {
+  const activeData = CHECKLIST_DATA.filter(i => enabledRooms.has(i.room));
+  const grouped = groupByRoom(activeData);
   let totalPass = 0, totalFail = 0, totalNA = 0, totalPending = 0;
 
-  CHECKLIST_DATA.forEach(item => {
+  activeData.forEach(item => {
     const s = states[item.sl]?.status;
     if (s === "pass") totalPass++;
     else if (s === "fail") totalFail++;
@@ -465,11 +501,11 @@ function generateReportHTML(states, data, inspectorName, flatNumber, projectName
     else totalPending++;
   });
 
-  const total = CHECKLIST_DATA.length;
-  const completionPct = Math.round(((total - totalPending) / total) * 100);
+  const total = activeData.length;
+  const completionPct = total > 0 ? Math.round(((total - totalPending) / total) * 100) : 0;
 
   let roomRows = "";
-  ROOM_ORDER.forEach(room => {
+  ROOM_ORDER.filter(r => enabledRooms.has(r)).forEach(room => {
     const items = grouped[room] || [];
     if (!items.length) return;
     const roomPass = items.filter(i => states[i.sl]?.status === "pass").length;
@@ -509,7 +545,7 @@ function generateReportHTML(states, data, inspectorName, flatNumber, projectName
   });
 
   // Failed items summary
-  const failedItems = CHECKLIST_DATA.filter(i => states[i.sl]?.status === "fail");
+  const failedItems = activeData.filter(i => states[i.sl]?.status === "fail");
   let failedSection = "";
   if (failedItems.length > 0) {
     failedSection = `
@@ -533,22 +569,24 @@ function generateReportHTML(states, data, inspectorName, flatNumber, projectName
       </div>`;
   }
 
-  return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Flat Handover Report</title>
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Flat Handover Report</title>
     <style>
-      @media print { body { margin: 0; } @page { margin: 14mm; } }
-      body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #18181b; margin: 0; padding: 24px; }
+      @media print { .no-print { display:none !important; } @page { margin: 14mm; } }
+      body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #18181b; margin: 0; padding: 0; background: #f0f0f0; }
     </style></head><body>
-    <div style="max-width:1000px;margin:0 auto;">
+    <div class="no-print" style="position:sticky;top:0;z-index:100;background:#18181b;padding:12px 24px;display:flex;justify-content:space-between;align-items:center;">
+      <span style="color:#fff;font-weight:600;font-size:14px;">🏠 Flat Handover Report</span>
+      <button onclick="window.print()" style="background:#fff;color:#18181b;border:none;padding:10px 22px;border-radius:8px;font-weight:700;cursor:pointer;font-size:14px;">🖨️ Print / Save as PDF</button>
+    </div>
+    <div style="max-width:1000px;margin:0 auto;padding:24px;background:#fff;min-height:100vh;box-sizing:border-box;">
       <div style="text-align:center;margin-bottom:32px;padding-bottom:24px;border-bottom:3px solid #18181b;">
         <h1 style="margin:0;font-size:26px;letter-spacing:-0.5px;">🏠 Flat Handover Inspection Report</h1>
         <p style="margin:8px 0 0;color:#71717a;font-size:14px;">Generated on ${new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</p>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px;">
-        <div style="background:#f9fafb;padding:14px 18px;border-radius:12px;"><span style="font-size:12px;color:#71717a;font-weight:600;">PROJECT</span><br/><strong>${projectName || "—"}</strong></div>
-        <div style="background:#f9fafb;padding:14px 18px;border-radius:12px;"><span style="font-size:12px;color:#71717a;font-weight:600;">FLAT NUMBER</span><br/><strong>${flatNumber || "—"}</strong></div>
-        <div style="background:#f9fafb;padding:14px 18px;border-radius:12px;"><span style="font-size:12px;color:#71717a;font-weight:600;">INSPECTOR</span><br/><strong>${inspectorName || "—"}</strong></div>
-        <div style="background:#f9fafb;padding:14px 18px;border-radius:12px;"><span style="font-size:12px;color:#71717a;font-weight:600;">INSPECTION DATE</span><br/><strong>${inspectionDate || new Date().toLocaleDateString("en-IN")}</strong></div>
+      <div style="display:flex;gap:12px;margin-bottom:28px;">
+        <div style="flex:1;background:#f9fafb;padding:14px 18px;border-radius:12px;"><span style="font-size:12px;color:#71717a;font-weight:600;">FLAT NUMBER</span><br/><strong>${flatNumber || "—"}</strong></div>
+        <div style="flex:1;background:#f9fafb;padding:14px 18px;border-radius:12px;"><span style="font-size:12px;color:#71717a;font-weight:600;">INSPECTION DATE</span><br/><strong>${inspectionDate || new Date().toLocaleDateString("en-IN")}</strong></div>
       </div>
 
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;">
@@ -593,7 +631,7 @@ function generateReportHTML(states, data, inspectorName, flatNumber, projectName
         <div>
           <p style="font-size:13px;color:#71717a;margin:0 0 40px;">Inspector Signature</p>
           <div style="border-bottom:1.5px solid #18181b;width:200px;"></div>
-          <p style="font-size:13px;font-weight:600;margin:8px 0 0;">${inspectorName || "________________"}</p>
+          <p style="font-size:13px;font-weight:600;margin:8px 0 0;">________________</p>
         </div>
         <div>
           <p style="font-size:13px;color:#71717a;margin:0 0 40px;">Owner / Representative</p>
@@ -606,30 +644,20 @@ function generateReportHTML(states, data, inspectorName, flatNumber, projectName
 }
 
 // ── Report Modal ──
-function ReportModal({ onClose, states }) {
-  const [inspectorName, setInspectorName] = useState("");
+function ReportModal({ onClose, states, enabledRooms }) {
   const [flatNumber, setFlatNumber] = useState("");
-  const [projectName, setProjectName] = useState("");
   const [inspectionDate, setInspectionDate] = useState(new Date().toISOString().split("T")[0]);
-  const [generating, setGenerating] = useState(false);
-
-  const total = CHECKLIST_DATA.length;
-  const completed = CHECKLIST_DATA.filter(i => states[i.sl]?.status).length;
-  const failed = CHECKLIST_DATA.filter(i => states[i.sl]?.status === "fail").length;
+  const activeData = CHECKLIST_DATA.filter(i => enabledRooms.has(i.room));
+  const total = activeData.length;
+  const completed = activeData.filter(i => states[i.sl]?.status).length;
+  const failed = activeData.filter(i => states[i.sl]?.status === "fail").length;
 
   const handleGenerate = () => {
-    setGenerating(true);
-    setTimeout(() => {
-      const html = generateReportHTML(states, null, inspectorName, flatNumber, projectName, inspectionDate);
-      const blob = new Blob([html], { type: "text/html" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `Flat_Handover_Report_${flatNumber || "Draft"}_${inspectionDate}.html`;
-      a.click();
-      URL.revokeObjectURL(url);
-      setGenerating(false);
-    }, 600);
+    const html = generateReportHTML(states, flatNumber, inspectionDate, enabledRooms);
+    const win = window.open("", "_blank");
+    win.document.write(html);
+    win.document.close();
+    onClose();
   };
 
   const inputStyle = {
@@ -674,21 +702,9 @@ function ReportModal({ onClose, states }) {
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <div>
             <label style={{ fontSize: 12, fontWeight: 700, color: "#52525b", letterSpacing: 0.5, textTransform: "uppercase", display: "block", marginBottom: 6 }}>
-              Project Name
-            </label>
-            <input style={inputStyle} value={projectName} onChange={e => setProjectName(e.target.value)} placeholder="e.g. Prestige Lake View" />
-          </div>
-          <div>
-            <label style={{ fontSize: 12, fontWeight: 700, color: "#52525b", letterSpacing: 0.5, textTransform: "uppercase", display: "block", marginBottom: 6 }}>
               Flat / Unit Number
             </label>
             <input style={inputStyle} value={flatNumber} onChange={e => setFlatNumber(e.target.value)} placeholder="e.g. A-1204" />
-          </div>
-          <div>
-            <label style={{ fontSize: 12, fontWeight: 700, color: "#52525b", letterSpacing: 0.5, textTransform: "uppercase", display: "block", marginBottom: 6 }}>
-              Inspector Name
-            </label>
-            <input style={inputStyle} value={inspectorName} onChange={e => setInspectorName(e.target.value)} placeholder="e.g. Ravi Kumar" />
           </div>
           <div>
             <label style={{ fontSize: 12, fontWeight: 700, color: "#52525b", letterSpacing: 0.5, textTransform: "uppercase", display: "block", marginBottom: 6 }}>
@@ -700,19 +716,18 @@ function ReportModal({ onClose, states }) {
 
         <button
           onClick={handleGenerate}
-          disabled={generating}
           style={{
             width: "100%", marginTop: 22,
             padding: "16px", borderRadius: 14,
             border: "none", cursor: "pointer",
-            background: generating ? "#a1a1aa" : "linear-gradient(135deg, #18181b, #3f3f46)",
+            background: "linear-gradient(135deg, #18181b, #3f3f46)",
             color: "#fff", fontSize: 15.5, fontWeight: 700,
             letterSpacing: -0.2,
             boxShadow: "0 4px 14px rgba(0,0,0,0.15)",
             transition: "all 0.2s ease",
           }}
         >
-          {generating ? "⏳ Generating..." : "📄 Download Report"}
+          📄 View Report
         </button>
 
         <button
@@ -732,11 +747,104 @@ function ReportModal({ onClose, states }) {
   );
 }
 
+// ── Room Config Modal ──
+function RoomConfigModal({ onClose, enabledRooms, setEnabledRooms }) {
+  const toggle = (room) => {
+    setEnabledRooms(prev => {
+      const next = new Set(prev);
+      if (next.has(room)) next.delete(room);
+      else next.add(room);
+      return next;
+    });
+  };
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed", inset: 0, zIndex: 1000,
+        background: "rgba(0,0,0,0.5)", backdropFilter: "blur(6px)",
+        display: "flex", alignItems: "flex-end", justifyContent: "center",
+        animation: "fadeIn 0.2s ease",
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: "#fff", borderRadius: "24px 24px 0 0",
+          width: "100%", maxWidth: 500,
+          maxHeight: "80vh", overflowY: "auto",
+          padding: "28px 24px 32px",
+          animation: "slideUp 0.3s ease",
+        }}
+      >
+        <div style={{ width: 40, height: 4, background: "#d4d4d8", borderRadius: 4, margin: "0 auto 20px" }} />
+        <h2 style={{ margin: "0 0 4px", fontSize: 20, fontWeight: 800, letterSpacing: -0.3, color: "#18181b" }}>
+          Unit Layout
+        </h2>
+        <p style={{ margin: "0 0 20px", fontSize: 13, color: "#71717a" }}>
+          Include only the rooms that exist in this unit.
+        </p>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {OPTIONAL_ROOMS.map(room => {
+            const on = enabledRooms.has(room);
+            const count = CHECKLIST_DATA.filter(i => i.room === room).length;
+            return (
+              <button
+                key={room}
+                onClick={() => toggle(room)}
+                style={{
+                  display: "flex", alignItems: "center", gap: 14,
+                  padding: "14px 16px", borderRadius: 14,
+                  border: on ? "2px solid #7c3aed" : "2px solid #e5e7eb",
+                  background: on ? "#faf5ff" : "#fafafa",
+                  cursor: "pointer", textAlign: "left", width: "100%",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                <span style={{ fontSize: 24 }}>{ROOM_ICONS[room]}</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700, fontSize: 14, color: "#18181b" }}>{room}</div>
+                  <div style={{ fontSize: 12, color: "#71717a", marginTop: 1 }}>{count} checklist items</div>
+                </div>
+                <div style={{
+                  width: 22, height: 22, borderRadius: "50%",
+                  background: on ? "#7c3aed" : "#e5e7eb",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  flexShrink: 0,
+                }}>
+                  {on && <span style={{ color: "#fff", fontSize: 13, fontWeight: 700 }}>✓</span>}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        <button
+          onClick={onClose}
+          style={{
+            width: "100%", marginTop: 20,
+            padding: "15px", borderRadius: 14,
+            border: "none", cursor: "pointer",
+            background: "linear-gradient(135deg, #18181b, #3f3f46)",
+            color: "#fff", fontSize: 15, fontWeight: 700,
+          }}
+        >
+          Done
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ── Main App ──
 export default function App() {
   const [states, setStates] = useState({});
+  const [enabledRooms, setEnabledRooms] = useState(DEFAULT_ENABLED_ROOMS);
   const [activeRoom, setActiveRoom] = useState(null);
   const [showReport, setShowReport] = useState(false);
+  const [showConfig, setShowConfig] = useState(false);
   const [filterMode, setFilterMode] = useState("all");
   const roomRefs = useRef({});
   const grouped = groupByRoom(CHECKLIST_DATA);
@@ -746,15 +854,22 @@ export default function App() {
     try {
       const saved = JSON.parse(window.name || "{}");
       if (saved && typeof saved === "object" && Object.keys(saved).length > 0) {
-        setStates(saved);
+        if (saved.states) {
+          // New format
+          setStates(saved.states);
+          setEnabledRooms(new Set(saved.enabledRooms || [...DEFAULT_ENABLED_ROOMS]));
+        } else {
+          // Legacy format — just states object
+          setStates(saved);
+        }
       }
     } catch {}
   }, []);
 
   // Save state
   useEffect(() => {
-    try { window.name = JSON.stringify(states); } catch {}
-  }, [states]);
+    try { window.name = JSON.stringify({ states, enabledRooms: [...enabledRooms] }); } catch {}
+  }, [states, enabledRooms]);
 
   const updateItem = (sl, state) => {
     setStates(prev => ({ ...prev, [sl]: state }));
@@ -765,11 +880,12 @@ export default function App() {
     roomRefs.current[room]?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const total = CHECKLIST_DATA.length;
-  const completed = CHECKLIST_DATA.filter(i => states[i.sl]?.status).length;
-  const passed = CHECKLIST_DATA.filter(i => states[i.sl]?.status === "pass").length;
-  const failed = CHECKLIST_DATA.filter(i => states[i.sl]?.status === "fail").length;
-  const pct = Math.round((completed / total) * 100);
+  const activeData = CHECKLIST_DATA.filter(i => enabledRooms.has(i.room));
+  const total = activeData.length;
+  const completed = activeData.filter(i => states[i.sl]?.status).length;
+  const passed = activeData.filter(i => states[i.sl]?.status === "pass").length;
+  const failed = activeData.filter(i => states[i.sl]?.status === "fail").length;
+  const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
 
   return (
     <div style={{
@@ -866,7 +982,7 @@ export default function App() {
         borderBottom: "1px solid #eee",
       }}>
         <RoomNav
-          rooms={ROOM_ORDER}
+          rooms={ROOM_ORDER.filter(r => enabledRooms.has(r))}
           states={states}
           data={grouped}
           activeRoom={activeRoom}
@@ -876,7 +992,7 @@ export default function App() {
 
       {/* Filter Bar */}
       <div style={{
-        padding: "12px 20px 4px", display: "flex", gap: 8,
+        padding: "12px 20px 4px", display: "flex", gap: 8, flexWrap: "wrap",
       }}>
         {[
           { key: "all", label: "All" },
@@ -897,11 +1013,22 @@ export default function App() {
             {f.label}
           </button>
         ))}
+        <button
+          onClick={() => setShowConfig(true)}
+          style={{
+            marginLeft: "auto", padding: "6px 14px", borderRadius: 8,
+            border: "1.5px solid #e5e7eb", background: "#fff",
+            color: "#52525b", fontSize: 13, fontWeight: 600, cursor: "pointer",
+            display: "flex", alignItems: "center", gap: 5,
+          }}
+        >
+          ⚙️ Rooms
+        </button>
       </div>
 
       {/* Room Sections */}
       <div style={{ padding: "12px 16px 120px" }}>
-        {ROOM_ORDER.map(room => {
+        {ROOM_ORDER.filter(r => enabledRooms.has(r)).map(room => {
           let items = grouped[room] || [];
           if (filterMode === "pending") {
             items = items.filter(i => !states[i.sl]?.status);
@@ -959,7 +1086,16 @@ export default function App() {
 
       {/* Report Modal */}
       {showReport && (
-        <ReportModal onClose={() => setShowReport(false)} states={states} />
+        <ReportModal onClose={() => setShowReport(false)} states={states} enabledRooms={enabledRooms} />
+      )}
+
+      {/* Room Config Modal */}
+      {showConfig && (
+        <RoomConfigModal
+          onClose={() => setShowConfig(false)}
+          enabledRooms={enabledRooms}
+          setEnabledRooms={setEnabledRooms}
+        />
       )}
     </div>
   );

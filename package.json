@@ -1,7 +1,7 @@
 {
   "name": "flat-handover-checklist",
   "version": "1.0.0",
-  "description": "A mobile-friendly flat/apartment handover inspection checklist web app with room-wise sections, pass/fail/NA toggles, remarks, and downloadable HTML reports.",
+  "description": "A mobile-friendly flat/apartment handover inspection checklist web app with room-wise sections, pass/fail/NA toggles, remarks, and downloadable PDF reports.",
   "private": true,
   "type": "module",
   "scripts": {
