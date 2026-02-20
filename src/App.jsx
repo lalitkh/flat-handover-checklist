@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import html2pdf from "html2pdf.js";
 
 const CHECKLIST_DATA = [
   {"sl":1,"room":"Drawing Room","desc":"Main Door - Polish & Finish","expected":"Smooth finish, no scratches, uniform gloss"},
@@ -534,7 +533,16 @@ function generateReportHTML(states, flatNumber, inspectionDate) {
       </div>`;
   }
 
-  return `<div style="max-width:1000px;margin:0 auto;padding:24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#18181b;">
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Flat Handover Report</title>
+    <style>
+      @media print { .no-print { display:none !important; } @page { margin: 14mm; } }
+      body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #18181b; margin: 0; padding: 0; background: #f0f0f0; }
+    </style></head><body>
+    <div class="no-print" style="position:sticky;top:0;z-index:100;background:#18181b;padding:12px 24px;display:flex;justify-content:space-between;align-items:center;">
+      <span style="color:#fff;font-weight:600;font-size:14px;">🏠 Flat Handover Report</span>
+      <button onclick="window.print()" style="background:#fff;color:#18181b;border:none;padding:10px 22px;border-radius:8px;font-weight:700;cursor:pointer;font-size:14px;">🖨️ Print / Save as PDF</button>
+    </div>
+    <div style="max-width:1000px;margin:0 auto;padding:24px;background:#fff;min-height:100vh;box-sizing:border-box;">
       <div style="text-align:center;margin-bottom:32px;padding-bottom:24px;border-bottom:3px solid #18181b;">
         <h1 style="margin:0;font-size:26px;letter-spacing:-0.5px;">🏠 Flat Handover Inspection Report</h1>
         <p style="margin:8px 0 0;color:#71717a;font-size:14px;">Generated on ${new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</p>
@@ -595,49 +603,24 @@ function generateReportHTML(states, flatNumber, inspectionDate) {
           <p style="font-size:13px;font-weight:600;margin:8px 0 0;">________________</p>
         </div>
       </div>
-    </div>`;
+    </div>
+  </body></html>`;
 }
 
 // ── Report Modal ──
 function ReportModal({ onClose, states }) {
   const [flatNumber, setFlatNumber] = useState("");
   const [inspectionDate, setInspectionDate] = useState(new Date().toISOString().split("T")[0]);
-  const [generating, setGenerating] = useState(false);
-
   const total = CHECKLIST_DATA.length;
   const completed = CHECKLIST_DATA.filter(i => states[i.sl]?.status).length;
   const failed = CHECKLIST_DATA.filter(i => states[i.sl]?.status === "fail").length;
 
-  const handleGenerate = async () => {
-    setGenerating(true);
-    try {
-      const htmlContent = generateReportHTML(states, flatNumber, inspectionDate);
-
-      const container = document.createElement("div");
-      container.style.position = "absolute";
-      container.style.top = "-9999px";
-      container.style.left = "0";
-      container.style.width = "1000px";
-      container.style.background = "#fff";
-      container.innerHTML = htmlContent;
-      document.body.appendChild(container);
-
-      const filename = `Flat_Handover_Report_${flatNumber || "Draft"}_${inspectionDate}.pdf`;
-      await html2pdf().set({
-        margin: [10, 10, 10, 10],
-        filename,
-        image: { type: "jpeg", quality: 0.95 },
-        html2canvas: { scale: 2, useCORS: true, width: 1000, windowWidth: 1000 },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-        pagebreak: { mode: ["avoid-all", "css", "legacy"] },
-      }).from(container).save();
-
-      document.body.removeChild(container);
-    } catch (err) {
-      console.error("PDF generation failed:", err);
-    } finally {
-      setGenerating(false);
-    }
+  const handleGenerate = () => {
+    const html = generateReportHTML(states, flatNumber, inspectionDate);
+    const win = window.open("", "_blank");
+    win.document.write(html);
+    win.document.close();
+    onClose();
   };
 
   const inputStyle = {
@@ -696,19 +679,18 @@ function ReportModal({ onClose, states }) {
 
         <button
           onClick={handleGenerate}
-          disabled={generating}
           style={{
             width: "100%", marginTop: 22,
             padding: "16px", borderRadius: 14,
             border: "none", cursor: "pointer",
-            background: generating ? "#a1a1aa" : "linear-gradient(135deg, #18181b, #3f3f46)",
+            background: "linear-gradient(135deg, #18181b, #3f3f46)",
             color: "#fff", fontSize: 15.5, fontWeight: 700,
             letterSpacing: -0.2,
             boxShadow: "0 4px 14px rgba(0,0,0,0.15)",
             transition: "all 0.2s ease",
           }}
         >
-          {generating ? "⏳ Generating PDF..." : "📄 Download PDF Report"}
+          📄 View Report
         </button>
 
         <button
