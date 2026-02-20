@@ -135,7 +135,29 @@ const CHECKLIST_DATA = [
   {"sl":132,"room":"General","desc":"Skirting Tiles - Fixing","expected":"Firm fixing, no damage or gaps. Check all skirting edges"},
   {"sl":133,"room":"General","desc":"Hollow Spots - Tiles/Plaster","expected":"No hollow sounds when tapped. Tap test all areas"},
   {"sl":134,"room":"General","desc":"Door Stoppers - Functionality","expected":"All stoppers present and functional. Check all doors"},
-  {"sl":135,"room":"General","desc":"Car Park/Common Area","expected":"Clean, proper markings, no damage. Visual inspection"}
+  {"sl":135,"room":"General","desc":"Car Park/Common Area","expected":"Clean, proper markings, no damage. Visual inspection"},
+  {"sl":136,"room":"Kids Bathroom","desc":"Tiles - Breakage/Missing","expected":"No broken, chipped, or missing tiles. Full coverage inspection"},
+  {"sl":137,"room":"Kids Bathroom","desc":"Tiles - Evenness/Level","expected":"Flush surface, no lippage (max 1mm difference). Use level tool"},
+  {"sl":138,"room":"Kids Bathroom","desc":"Wash Basin - Fixing & Stability","expected":"Firm fixing, no movement or flexing. Apply pressure test"},
+  {"sl":139,"room":"Kids Bathroom","desc":"Commode - Fixing & Condition","expected":"Firm fixing to floor, no movement, no scratches. Apply pressure test"},
+  {"sl":140,"room":"Kids Bathroom","desc":"Bathroom - Slope/Drainage","expected":"Proper slope for drainage, no water pooling. Check with water test"},
+  {"sl":141,"room":"Kids Bathroom","desc":"Ventilation - Exhaust Fan","expected":"Functional, proper suction, quiet operation. Test for 2 minutes"},
+  {"sl":142,"room":"Kids Bathroom","desc":"Geyser - Leakage & Condition","expected":"No leaks at connections or tank. Inspect for 5 minutes"},
+  {"sl":143,"room":"Kids Bathroom","desc":"Bathroom - Taps/Faucets","expected":"All taps functional, smooth operation, no leaks. Test all taps"},
+  {"sl":144,"room":"Maid Room","desc":"Door - Scratches/Paint","expected":"Clean finish, no paint drips or marks. Inspect entire door surface"},
+  {"sl":145,"room":"Maid Room","desc":"Door - Gap/Alignment","expected":"Max 3mm gap, door aligned properly. Check all sides"},
+  {"sl":146,"room":"Maid Room","desc":"Flooring - Tiles","expected":"No broken or chipped tiles, even surface. Full coverage inspection"},
+  {"sl":147,"room":"Maid Room","desc":"Paint - Walls & Ceiling","expected":"Even coating, no patchy areas, correct color. Inspect all surfaces"},
+  {"sl":148,"room":"Maid Room","desc":"Electrical - Switches & Sockets","expected":"All switches functional and secure. Test each switch"},
+  {"sl":149,"room":"Maid Room","desc":"Ventilation / Window","expected":"Proper ventilation, window opens/closes smoothly. Test mechanism"},
+  {"sl":150,"room":"Maid Bathroom","desc":"Tiles - Breakage/Missing","expected":"No broken, chipped, or missing tiles. Full coverage inspection"},
+  {"sl":151,"room":"Maid Bathroom","desc":"Tiles - Evenness/Level","expected":"Flush surface, no lippage (max 1mm difference). Use level tool"},
+  {"sl":152,"room":"Maid Bathroom","desc":"Wash Basin - Fixing & Stability","expected":"Firm fixing, no movement or flexing. Apply pressure test"},
+  {"sl":153,"room":"Maid Bathroom","desc":"Commode - Fixing & Condition","expected":"Firm fixing to floor, no movement, no scratches. Apply pressure test"},
+  {"sl":154,"room":"Maid Bathroom","desc":"Bathroom - Slope/Drainage","expected":"Proper slope for drainage, no water pooling. Check with water test"},
+  {"sl":155,"room":"Maid Bathroom","desc":"Ventilation - Exhaust Fan","expected":"Functional, proper suction, quiet operation. Test for 2 minutes"},
+  {"sl":156,"room":"Maid Bathroom","desc":"Geyser - Leakage & Condition","expected":"No leaks at connections or tank. Inspect for 5 minutes"},
+  {"sl":157,"room":"Maid Bathroom","desc":"Bathroom - Taps/Faucets","expected":"All taps functional, smooth operation, no leaks. Test all taps"}
 ];
 
 const ROOM_ICONS = {
@@ -146,14 +168,27 @@ const ROOM_ICONS = {
   "Guest Bedroom": "🛌",
   "Guest Bathroom": "🚰",
   "Kids Room": "🧒",
+  "Kids Bathroom": "🛁",
   "Common Bathroom": "🚻",
+  "Maid Room": "🧹",
+  "Maid Bathroom": "🪣",
   "General": "🏠",
 };
 
 const ROOM_ORDER = [
   "Drawing Room", "Kitchen", "Master Bedroom", "Master Bathroom",
-  "Guest Bedroom", "Guest Bathroom", "Kids Room", "Common Bathroom", "General"
+  "Guest Bedroom", "Guest Bathroom", "Kids Room", "Kids Bathroom",
+  "Common Bathroom", "Maid Room", "Maid Bathroom", "General"
 ];
+
+// Rooms that can be toggled on/off based on unit layout
+const OPTIONAL_ROOMS = [
+  "Guest Bedroom", "Guest Bathroom", "Kids Room", "Kids Bathroom",
+  "Common Bathroom", "Maid Room", "Maid Bathroom"
+];
+// New rooms added — disabled by default until user opts in
+const NEW_OPTIONAL_ROOMS = ["Kids Bathroom", "Maid Room", "Maid Bathroom"];
+const DEFAULT_ENABLED_ROOMS = new Set(ROOM_ORDER.filter(r => !NEW_OPTIONAL_ROOMS.includes(r)));
 
 function groupByRoom(data) {
   const grouped = {};
@@ -453,11 +488,12 @@ function RoomNav({ rooms, states, data, activeRoom, onSelect }) {
 }
 
 // ── Report Generator ──
-function generateReportHTML(states, flatNumber, inspectionDate) {
-  const grouped = groupByRoom(CHECKLIST_DATA);
+function generateReportHTML(states, flatNumber, inspectionDate, enabledRooms) {
+  const activeData = CHECKLIST_DATA.filter(i => enabledRooms.has(i.room));
+  const grouped = groupByRoom(activeData);
   let totalPass = 0, totalFail = 0, totalNA = 0, totalPending = 0;
 
-  CHECKLIST_DATA.forEach(item => {
+  activeData.forEach(item => {
     const s = states[item.sl]?.status;
     if (s === "pass") totalPass++;
     else if (s === "fail") totalFail++;
@@ -465,11 +501,11 @@ function generateReportHTML(states, flatNumber, inspectionDate) {
     else totalPending++;
   });
 
-  const total = CHECKLIST_DATA.length;
-  const completionPct = Math.round(((total - totalPending) / total) * 100);
+  const total = activeData.length;
+  const completionPct = total > 0 ? Math.round(((total - totalPending) / total) * 100) : 0;
 
   let roomRows = "";
-  ROOM_ORDER.forEach(room => {
+  ROOM_ORDER.filter(r => enabledRooms.has(r)).forEach(room => {
     const items = grouped[room] || [];
     if (!items.length) return;
     const roomPass = items.filter(i => states[i.sl]?.status === "pass").length;
@@ -509,7 +545,7 @@ function generateReportHTML(states, flatNumber, inspectionDate) {
   });
 
   // Failed items summary
-  const failedItems = CHECKLIST_DATA.filter(i => states[i.sl]?.status === "fail");
+  const failedItems = activeData.filter(i => states[i.sl]?.status === "fail");
   let failedSection = "";
   if (failedItems.length > 0) {
     failedSection = `
@@ -608,15 +644,16 @@ function generateReportHTML(states, flatNumber, inspectionDate) {
 }
 
 // ── Report Modal ──
-function ReportModal({ onClose, states }) {
+function ReportModal({ onClose, states, enabledRooms }) {
   const [flatNumber, setFlatNumber] = useState("");
   const [inspectionDate, setInspectionDate] = useState(new Date().toISOString().split("T")[0]);
-  const total = CHECKLIST_DATA.length;
-  const completed = CHECKLIST_DATA.filter(i => states[i.sl]?.status).length;
-  const failed = CHECKLIST_DATA.filter(i => states[i.sl]?.status === "fail").length;
+  const activeData = CHECKLIST_DATA.filter(i => enabledRooms.has(i.room));
+  const total = activeData.length;
+  const completed = activeData.filter(i => states[i.sl]?.status).length;
+  const failed = activeData.filter(i => states[i.sl]?.status === "fail").length;
 
   const handleGenerate = () => {
-    const html = generateReportHTML(states, flatNumber, inspectionDate);
+    const html = generateReportHTML(states, flatNumber, inspectionDate, enabledRooms);
     const win = window.open("", "_blank");
     win.document.write(html);
     win.document.close();
@@ -710,11 +747,104 @@ function ReportModal({ onClose, states }) {
   );
 }
 
+// ── Room Config Modal ──
+function RoomConfigModal({ onClose, enabledRooms, setEnabledRooms }) {
+  const toggle = (room) => {
+    setEnabledRooms(prev => {
+      const next = new Set(prev);
+      if (next.has(room)) next.delete(room);
+      else next.add(room);
+      return next;
+    });
+  };
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed", inset: 0, zIndex: 1000,
+        background: "rgba(0,0,0,0.5)", backdropFilter: "blur(6px)",
+        display: "flex", alignItems: "flex-end", justifyContent: "center",
+        animation: "fadeIn 0.2s ease",
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: "#fff", borderRadius: "24px 24px 0 0",
+          width: "100%", maxWidth: 500,
+          maxHeight: "80vh", overflowY: "auto",
+          padding: "28px 24px 32px",
+          animation: "slideUp 0.3s ease",
+        }}
+      >
+        <div style={{ width: 40, height: 4, background: "#d4d4d8", borderRadius: 4, margin: "0 auto 20px" }} />
+        <h2 style={{ margin: "0 0 4px", fontSize: 20, fontWeight: 800, letterSpacing: -0.3, color: "#18181b" }}>
+          Unit Layout
+        </h2>
+        <p style={{ margin: "0 0 20px", fontSize: 13, color: "#71717a" }}>
+          Include only the rooms that exist in this unit.
+        </p>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {OPTIONAL_ROOMS.map(room => {
+            const on = enabledRooms.has(room);
+            const count = CHECKLIST_DATA.filter(i => i.room === room).length;
+            return (
+              <button
+                key={room}
+                onClick={() => toggle(room)}
+                style={{
+                  display: "flex", alignItems: "center", gap: 14,
+                  padding: "14px 16px", borderRadius: 14,
+                  border: on ? "2px solid #7c3aed" : "2px solid #e5e7eb",
+                  background: on ? "#faf5ff" : "#fafafa",
+                  cursor: "pointer", textAlign: "left", width: "100%",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                <span style={{ fontSize: 24 }}>{ROOM_ICONS[room]}</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700, fontSize: 14, color: "#18181b" }}>{room}</div>
+                  <div style={{ fontSize: 12, color: "#71717a", marginTop: 1 }}>{count} checklist items</div>
+                </div>
+                <div style={{
+                  width: 22, height: 22, borderRadius: "50%",
+                  background: on ? "#7c3aed" : "#e5e7eb",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  flexShrink: 0,
+                }}>
+                  {on && <span style={{ color: "#fff", fontSize: 13, fontWeight: 700 }}>✓</span>}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        <button
+          onClick={onClose}
+          style={{
+            width: "100%", marginTop: 20,
+            padding: "15px", borderRadius: 14,
+            border: "none", cursor: "pointer",
+            background: "linear-gradient(135deg, #18181b, #3f3f46)",
+            color: "#fff", fontSize: 15, fontWeight: 700,
+          }}
+        >
+          Done
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ── Main App ──
 export default function App() {
   const [states, setStates] = useState({});
+  const [enabledRooms, setEnabledRooms] = useState(DEFAULT_ENABLED_ROOMS);
   const [activeRoom, setActiveRoom] = useState(null);
   const [showReport, setShowReport] = useState(false);
+  const [showConfig, setShowConfig] = useState(false);
   const [filterMode, setFilterMode] = useState("all");
   const roomRefs = useRef({});
   const grouped = groupByRoom(CHECKLIST_DATA);
@@ -724,15 +854,22 @@ export default function App() {
     try {
       const saved = JSON.parse(window.name || "{}");
       if (saved && typeof saved === "object" && Object.keys(saved).length > 0) {
-        setStates(saved);
+        if (saved.states) {
+          // New format
+          setStates(saved.states);
+          setEnabledRooms(new Set(saved.enabledRooms || [...DEFAULT_ENABLED_ROOMS]));
+        } else {
+          // Legacy format — just states object
+          setStates(saved);
+        }
       }
     } catch {}
   }, []);
 
   // Save state
   useEffect(() => {
-    try { window.name = JSON.stringify(states); } catch {}
-  }, [states]);
+    try { window.name = JSON.stringify({ states, enabledRooms: [...enabledRooms] }); } catch {}
+  }, [states, enabledRooms]);
 
   const updateItem = (sl, state) => {
     setStates(prev => ({ ...prev, [sl]: state }));
@@ -743,11 +880,12 @@ export default function App() {
     roomRefs.current[room]?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const total = CHECKLIST_DATA.length;
-  const completed = CHECKLIST_DATA.filter(i => states[i.sl]?.status).length;
-  const passed = CHECKLIST_DATA.filter(i => states[i.sl]?.status === "pass").length;
-  const failed = CHECKLIST_DATA.filter(i => states[i.sl]?.status === "fail").length;
-  const pct = Math.round((completed / total) * 100);
+  const activeData = CHECKLIST_DATA.filter(i => enabledRooms.has(i.room));
+  const total = activeData.length;
+  const completed = activeData.filter(i => states[i.sl]?.status).length;
+  const passed = activeData.filter(i => states[i.sl]?.status === "pass").length;
+  const failed = activeData.filter(i => states[i.sl]?.status === "fail").length;
+  const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
 
   return (
     <div style={{
@@ -844,7 +982,7 @@ export default function App() {
         borderBottom: "1px solid #eee",
       }}>
         <RoomNav
-          rooms={ROOM_ORDER}
+          rooms={ROOM_ORDER.filter(r => enabledRooms.has(r))}
           states={states}
           data={grouped}
           activeRoom={activeRoom}
@@ -854,7 +992,7 @@ export default function App() {
 
       {/* Filter Bar */}
       <div style={{
-        padding: "12px 20px 4px", display: "flex", gap: 8,
+        padding: "12px 20px 4px", display: "flex", gap: 8, flexWrap: "wrap",
       }}>
         {[
           { key: "all", label: "All" },
@@ -875,11 +1013,22 @@ export default function App() {
             {f.label}
           </button>
         ))}
+        <button
+          onClick={() => setShowConfig(true)}
+          style={{
+            marginLeft: "auto", padding: "6px 14px", borderRadius: 8,
+            border: "1.5px solid #e5e7eb", background: "#fff",
+            color: "#52525b", fontSize: 13, fontWeight: 600, cursor: "pointer",
+            display: "flex", alignItems: "center", gap: 5,
+          }}
+        >
+          ⚙️ Rooms
+        </button>
       </div>
 
       {/* Room Sections */}
       <div style={{ padding: "12px 16px 120px" }}>
-        {ROOM_ORDER.map(room => {
+        {ROOM_ORDER.filter(r => enabledRooms.has(r)).map(room => {
           let items = grouped[room] || [];
           if (filterMode === "pending") {
             items = items.filter(i => !states[i.sl]?.status);
@@ -937,7 +1086,16 @@ export default function App() {
 
       {/* Report Modal */}
       {showReport && (
-        <ReportModal onClose={() => setShowReport(false)} states={states} />
+        <ReportModal onClose={() => setShowReport(false)} states={states} enabledRooms={enabledRooms} />
+      )}
+
+      {/* Room Config Modal */}
+      {showConfig && (
+        <RoomConfigModal
+          onClose={() => setShowConfig(false)}
+          enabledRooms={enabledRooms}
+          setEnabledRooms={setEnabledRooms}
+        />
       )}
     </div>
   );
