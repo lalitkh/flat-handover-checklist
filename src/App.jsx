@@ -454,7 +454,7 @@ function RoomNav({ rooms, states, data, activeRoom, onSelect }) {
 }
 
 // ── Report Generator ──
-function generateReportHTML(states, data, inspectorName, flatNumber, projectName, inspectionDate) {
+function generateReportHTML(states, flatNumber, inspectionDate) {
   const grouped = groupByRoom(CHECKLIST_DATA);
   let totalPass = 0, totalFail = 0, totalNA = 0, totalPending = 0;
 
@@ -540,11 +540,9 @@ function generateReportHTML(states, data, inspectorName, flatNumber, projectName
         <p style="margin:8px 0 0;color:#71717a;font-size:14px;">Generated on ${new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</p>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px;">
-        <div style="background:#f9fafb;padding:14px 18px;border-radius:12px;"><span style="font-size:12px;color:#71717a;font-weight:600;">PROJECT</span><br/><strong>${projectName || "—"}</strong></div>
-        <div style="background:#f9fafb;padding:14px 18px;border-radius:12px;"><span style="font-size:12px;color:#71717a;font-weight:600;">FLAT NUMBER</span><br/><strong>${flatNumber || "—"}</strong></div>
-        <div style="background:#f9fafb;padding:14px 18px;border-radius:12px;"><span style="font-size:12px;color:#71717a;font-weight:600;">INSPECTOR</span><br/><strong>${inspectorName || "—"}</strong></div>
-        <div style="background:#f9fafb;padding:14px 18px;border-radius:12px;"><span style="font-size:12px;color:#71717a;font-weight:600;">INSPECTION DATE</span><br/><strong>${inspectionDate || new Date().toLocaleDateString("en-IN")}</strong></div>
+      <div style="display:flex;gap:12px;margin-bottom:28px;">
+        <div style="flex:1;background:#f9fafb;padding:14px 18px;border-radius:12px;"><span style="font-size:12px;color:#71717a;font-weight:600;">FLAT NUMBER</span><br/><strong>${flatNumber || "—"}</strong></div>
+        <div style="flex:1;background:#f9fafb;padding:14px 18px;border-radius:12px;"><span style="font-size:12px;color:#71717a;font-weight:600;">INSPECTION DATE</span><br/><strong>${inspectionDate || new Date().toLocaleDateString("en-IN")}</strong></div>
       </div>
 
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;">
@@ -589,7 +587,7 @@ function generateReportHTML(states, data, inspectorName, flatNumber, projectName
         <div>
           <p style="font-size:13px;color:#71717a;margin:0 0 40px;">Inspector Signature</p>
           <div style="border-bottom:1.5px solid #18181b;width:200px;"></div>
-          <p style="font-size:13px;font-weight:600;margin:8px 0 0;">${inspectorName || "________________"}</p>
+          <p style="font-size:13px;font-weight:600;margin:8px 0 0;">________________</p>
         </div>
         <div>
           <p style="font-size:13px;color:#71717a;margin:0 0 40px;">Owner / Representative</p>
@@ -602,9 +600,7 @@ function generateReportHTML(states, data, inspectorName, flatNumber, projectName
 
 // ── Report Modal ──
 function ReportModal({ onClose, states }) {
-  const [inspectorName, setInspectorName] = useState("");
   const [flatNumber, setFlatNumber] = useState("");
-  const [projectName, setProjectName] = useState("");
   const [inspectionDate, setInspectionDate] = useState(new Date().toISOString().split("T")[0]);
   const [generating, setGenerating] = useState(false);
 
@@ -615,12 +611,12 @@ function ReportModal({ onClose, states }) {
   const handleGenerate = async () => {
     setGenerating(true);
     try {
-      const htmlContent = generateReportHTML(states, null, inspectorName, flatNumber, projectName, inspectionDate);
+      const htmlContent = generateReportHTML(states, flatNumber, inspectionDate);
 
       const container = document.createElement("div");
-      container.style.position = "fixed";
-      container.style.left = "-9999px";
-      container.style.top = "0";
+      container.style.position = "absolute";
+      container.style.top = "-9999px";
+      container.style.left = "0";
       container.style.width = "1000px";
       container.style.background = "#fff";
       container.innerHTML = htmlContent;
@@ -686,21 +682,9 @@ function ReportModal({ onClose, states }) {
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <div>
             <label style={{ fontSize: 12, fontWeight: 700, color: "#52525b", letterSpacing: 0.5, textTransform: "uppercase", display: "block", marginBottom: 6 }}>
-              Project Name
-            </label>
-            <input style={inputStyle} value={projectName} onChange={e => setProjectName(e.target.value)} placeholder="e.g. Prestige Lake View" />
-          </div>
-          <div>
-            <label style={{ fontSize: 12, fontWeight: 700, color: "#52525b", letterSpacing: 0.5, textTransform: "uppercase", display: "block", marginBottom: 6 }}>
               Flat / Unit Number
             </label>
             <input style={inputStyle} value={flatNumber} onChange={e => setFlatNumber(e.target.value)} placeholder="e.g. A-1204" />
-          </div>
-          <div>
-            <label style={{ fontSize: 12, fontWeight: 700, color: "#52525b", letterSpacing: 0.5, textTransform: "uppercase", display: "block", marginBottom: 6 }}>
-              Inspector Name
-            </label>
-            <input style={inputStyle} value={inspectorName} onChange={e => setInspectorName(e.target.value)} placeholder="e.g. Ravi Kumar" />
           </div>
           <div>
             <label style={{ fontSize: 12, fontWeight: 700, color: "#52525b", letterSpacing: 0.5, textTransform: "uppercase", display: "block", marginBottom: 6 }}>
