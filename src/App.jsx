@@ -939,6 +939,7 @@ function WelcomeScreen({ onStartNew, onImport }) {
     { icon: "📋", title: "Inspect Items", desc: "Tap each checklist item to expand, then mark as Pass, Fail, or N/A" },
     { icon: "💬", title: "Add Remarks", desc: "Note down observations or issues for any item that needs attention" },
     { icon: "📊", title: "Generate Report", desc: "Create a detailed HTML report or export data as JSON for sharing" },
+    { icon: "📥", title: "Import Progress", desc: "Import JSON feature and restore previous report and continue" },
   ];
 
   return (
