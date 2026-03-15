@@ -1,163 +1,163 @@
 import { useState, useEffect, useRef } from "react";
 
 const CHECKLIST_DATA = [
-  {"sl":1,"room":"Drawing Room","desc":"Main Door - Polish & Finish","expected":"Smooth finish, no scratches, uniform gloss"},
-  {"sl":2,"room":"Drawing Room","desc":"Main Door - Surface Scratches","expected":"No visible scratches or marks. Inspect under different lighting"},
-  {"sl":3,"room":"Drawing Room","desc":"Main Door - Frame & Wall Gap","expected":"Max 2mm gap, uniform on all sides. Check with 2mm gauge"},
-  {"sl":4,"room":"Drawing Room","desc":"Main Door - Locks & Latches","expected":"Smooth operation, no grinding, secure locking. Test 5+ cycles"},
-  {"sl":5,"room":"Drawing Room","desc":"Main Door - Open/Close Smoothness","expected":"Smooth hinges, no friction, 90° opening. Check all hinges"},
-  {"sl":6,"room":"Drawing Room","desc":"Paint - Double Coat Application","expected":"Even coating, no patchy areas, correct color"},
-  {"sl":7,"room":"Drawing Room","desc":"Tiles - Breakage/Missing","expected":"No broken, chipped, or missing tiles. Full coverage inspection"},
-  {"sl":8,"room":"Drawing Room","desc":"Tile Fixing - Gaps/Hollowness","expected":"No hollow sound, all tiles firmly fixed. Tap test each tile"},
-  {"sl":9,"room":"Drawing Room","desc":"Tiles - Cement Gaps","expected":"Uniform grouting, max 3mm gap. Check color uniformity"},
-  {"sl":10,"room":"Drawing Room","desc":"Tiles - Evenness/Level","expected":"Flush surface, no lippage (max 1mm difference). Use level tool"},
-  {"sl":11,"room":"Drawing Room","desc":"Plug Points - Functionality","expected":"All outlets functional, earthing proper. Test with multimeter"},
-  {"sl":12,"room":"Drawing Room","desc":"MCB Panel - Switch Function","expected":"All switches toggle smoothly, no loose connections. Test each circuit"},
-  {"sl":13,"room":"Drawing Room","desc":"Sliding Door - Smoothness","expected":"Smooth gliding, no grinding, aligned properly. Test 10+ cycles"},
-  {"sl":14,"room":"Drawing Room","desc":"Sliding Door - Frame - Scratches/Paint","expected":"Clean finish, no paint drips, uniform color"},
-  {"sl":15,"room":"Drawing Room","desc":"Sliding Door - Frame - Wall Gaps","expected":"Max 2mm gap, no cracks around frame. Check all corners"},
-  {"sl":16,"room":"Drawing Room","desc":"Sliding Door - Glass - Cracks/Defects","expected":"No cracks, chips, or scratches on glass. Check against light"},
-  {"sl":17,"room":"Drawing Room","desc":"Sliding Door - Lock Mechanism","expected":"Smooth locking/unlocking, secure hold. Test locking action"},
-  {"sl":18,"room":"Drawing Room","desc":"Balcony Floor – Tiles/Railing","expected":"Tiles intact, correct slope outwards, railing firm & rust‑free, shake railing gently"},
-  {"sl":19,"room":"Drawing Room","desc":"Balcony Drain – Water Flow","expected":"No choking; water drains within 2–3 minutes, Pour bucket of water and observe flow"},
-  {"sl":20,"room":"Kitchen","desc":"Tiles - Breakage/Missing","expected":"No broken, chipped, or missing tiles. Full coverage inspection"},
-  {"sl":21,"room":"Kitchen","desc":"Tiles - Gaps/Hollowness","expected":"No hollow sound, all tiles firmly fixed. Tap test on all surfaces"},
-  {"sl":22,"room":"Kitchen","desc":"Tiles - Cement Gaps","expected":"Uniform grouting, max 3mm gap, even color. Check color uniformity"},
-  {"sl":23,"room":"Kitchen","desc":"Paint - Double Coat","expected":"Even coating, no patchy areas, correct color. Inspect all walls"},
-  {"sl":24,"room":"Kitchen","desc":"Plug Points - Functionality","expected":"All outlets functional, earthing proper. Test with multimeter"},
-  {"sl":25,"room":"Kitchen","desc":"Water Flow - Sink/Washing Area","expected":"Good water pressure, no fluctuation. Check for 2 minutes"},
-  {"sl":26,"room":"Kitchen","desc":"Utility Door - Scratches/Paint Issues","expected":"Clean finish, no paint drips. Check glass and frame"},
-  {"sl":27,"room":"Kitchen","desc":"Utility Door - Smoothness","expected":"Smooth operation, no sticking. Test open/close multiple times"},
-  {"sl":28,"room":"Kitchen","desc":"Utility Door - Locks","expected":"Smooth locking/unlocking, secure hold. Test lock mechanism"},
-  {"sl":29,"room":"Kitchen","desc":"Utility Door - Glass Condition","expected":"No cracks, chips, or scratches. Check against light"},
-  {"sl":30,"room":"Kitchen","desc":"Utility Floor – Tiles/Railing","expected":"Tiles intact, correct slope outwards, railing firm & rust‑free, shake railing gently"},
-  {"sl":31,"room":"Kitchen","desc":"Utility Drain – Water Flow","expected":"No choking; water drains within 2–3 minutes, Pour bucket of water and observe flow"},
-  {"sl":32,"room":"Kitchen","desc":"Utility External Wall – Paint and Cracks","expected":"Even coating, no patchy areas, correct color. Inspect all walls"},
-  {"sl":33,"room":"Kitchen","desc":"Sink - Fixing & Stability","expected":"Firm fixing, no movement or flexing. Apply downward pressure"},
-  {"sl":34,"room":"Kitchen","desc":"Sink - Cement Gaps","expected":"No gaps around edges, proper sealing. Check all edges"},
-  {"sl":35,"room":"Kitchen","desc":"Sink - Leakage Test","expected":"No leaks after 5-minute water run. Fill sink completely"},
-  {"sl":36,"room":"Kitchen","desc":"Sink - Drain Blockage","expected":"Free flow of water, no blockage. Pour water at full pressure"},
-  {"sl":37,"room":"Master Bedroom","desc":"Door - Scratches/Paint","expected":"Clean finish, no paint drips or marks. Inspect entire door surface"},
-  {"sl":38,"room":"Master Bedroom","desc":"Door - Gap/Alignment","expected":"Max 3mm gap, door aligned properly. Check all sides"},
-  {"sl":39,"room":"Master Bedroom","desc":"Ceiling - Paint/Double Coat","expected":"Even coating, no patchy areas, correct color. Inspect entire ceiling"},
-  {"sl":40,"room":"Master Bedroom","desc":"Paint - Double Coat Application","expected":"Even coating, no patchy areas, correct color"},
-  {"sl":41,"room":"Master Bedroom","desc":"Balcony Door - Smoothness/Open-Close","expected":"Smooth operation, glides without resistance. Test 10+ times"},
-  {"sl":42,"room":"Master Bedroom","desc":"Balcony Door - Locks","expected":"Smooth locking/unlocking, secure hold. Test lock mechanism"},
-  {"sl":43,"room":"Master Bedroom","desc":"Balcony Door Frame - Scratches/Bend","expected":"No scratches, uniform color, no bending. Inspect all frame edges"},
-  {"sl":44,"room":"Master Bedroom","desc":"Balcony Door Glass - Cracks/Defects","expected":"No cracks, chips, or scratches. Check against light"},
-  {"sl":45,"room":"Master Bedroom","desc":"Balcony Floor – Tiles/Railing","expected":"Tiles intact, correct slope outwards, railing firm & rust‑free, shake railing gently"},
-  {"sl":46,"room":"Master Bedroom","desc":"Balcony Drain – Water Flow","expected":"No choking; water drains within 2–3 minutes, Pour bucket of water and observe flow"},
-  {"sl":47,"room":"Master Bathroom","desc":"Tiles - Breakage/Missing","expected":"No broken, chipped, or missing tiles. Full coverage inspection"},
-  {"sl":48,"room":"Master Bathroom","desc":"Tiles - Evenness/Level","expected":"Flush surface, no lippage (max 1mm difference). Use level tool"},
-  {"sl":49,"room":"Master Bathroom","desc":"Tiles - Cement Gaps","expected":"Uniform grouting, max 3mm gap. Check color uniformity"},
-  {"sl":50,"room":"Master Bathroom","desc":"Wash Basin - Fixing & Stability","expected":"Firm fixing, no movement or flexing. Apply pressure test"},
-  {"sl":51,"room":"Master Bathroom","desc":"Wash Basin - Leakage Test","expected":"No leaks from pipes or connections. Run water for 3 minutes"},
-  {"sl":52,"room":"Master Bathroom","desc":"Wash Basin - Blockage","expected":"Free water flow, no blockage. Test drain with full water"},
-  {"sl":53,"room":"Master Bathroom","desc":"Granite - Fixing & Stability","expected":"Firm fixing, no movement, no cracks. Check all connection points"},
-  {"sl":54,"room":"Master Bathroom","desc":"Commode - Fixing","expected":"Firm fixing to floor, no movement. Apply pressure test"},
-  {"sl":55,"room":"Master Bathroom","desc":"Commode - Blockage","expected":"Free flow, no blockage, smooth operation. Test flush mechanism"},
-  {"sl":56,"room":"Master Bathroom","desc":"Commode - Leakage","expected":"No leaks at base or connections. Check after multiple flushes"},
-  {"sl":57,"room":"Master Bathroom","desc":"Commode - Scratches/Condition","expected":"Clean, no cracks or scratches on porcelain. Visual inspection"},
-  {"sl":58,"room":"Master Bathroom","desc":"Bathroom - Slope/Drainage","expected":"Proper slope for drainage, no water pooling. Check with water test"},
-  {"sl":59,"room":"Master Bathroom","desc":"Bathroom - Leaks/Dampness","expected":"No seepage, no damp spots on walls/ceiling. Check all corners"},
-  {"sl":60,"room":"Master Bathroom","desc":"Bathroom - False Ceiling","expected":"Proper fixing, no sagging or damage. Check alignment"},
-  {"sl":61,"room":"Master Bathroom","desc":"Bathroom - Light Fixture","expected":"Functional, proper brightness, no flickering. Test ON/OFF"},
-  {"sl":62,"room":"Master Bathroom","desc":"Ventilation - Exhaust Fan","expected":"Functional, proper suction, quiet operation. Test for 2 minutes"},
-  {"sl":63,"room":"Master Bathroom","desc":"Geyser - Leakage","expected":"No leaks at connections or tank. Inspect for 5 minutes"},
-  {"sl":64,"room":"Master Bathroom","desc":"Geyser - Working Condition","expected":"Heats water within 3-5 minutes. Test temperature"},
-  {"sl":65,"room":"Master Bathroom","desc":"Geyser - Switch/Control","expected":"Switch works smoothly, thermostat functions. Test heating control"},
-  {"sl":66,"room":"Master Bathroom","desc":"Bathroom - Overall Cleanliness","expected":"Clean, no debris or loose material. Final visual check"},
-  {"sl":67,"room":"Master Bathroom","desc":"Bathroom - Taps/Faucets","expected":"All taps functional, smooth operation, no leaks. Test all taps"},
-  {"sl":68,"room":"Master Bathroom","desc":"Bathroom Door - Lock/Condition","expected":"Smooth operation, secure lock, no damage. Test lock mechanism"},
-  {"sl":69,"room":"Guest Bedroom","desc":"Door - Scratches/Paint","expected":"Clean finish, no paint drips or marks. Inspect entire door surface"},
-  {"sl":70,"room":"Guest Bedroom","desc":"Door - Gap/Alignment","expected":"Max 3mm gap, door aligned properly. Check all sides"},
-  {"sl":71,"room":"Guest Bedroom","desc":"Ceiling - Paint/Double Coat","expected":"Even coating, no patchy areas, correct color. Inspect entire ceiling"},
-  {"sl":72,"room":"Guest Bedroom","desc":"Paint - Double Coat Application","expected":"Even coating, no patchy areas, correct color"},
-  {"sl":73,"room":"Guest Bedroom","desc":"Window - Smoothness/Open-Close","expected":"Smooth operation, glides without resistance. Test 10+ times"},
-  {"sl":74,"room":"Guest Bedroom","desc":"Window - Locks","expected":"Smooth locking/unlocking, secure hold. Test lock mechanism"},
-  {"sl":75,"room":"Guest Bedroom","desc":"Window Frame - Scratches/Bend/Paint","expected":"No scratches, uniform color, no bending. Inspect all frame edges"},
-  {"sl":76,"room":"Guest Bedroom","desc":"Window Glass - Cracks/Defects","expected":"No cracks, chips, or scratches. Check against light"},
-  {"sl":77,"room":"Guest Bathroom","desc":"Tiles - Breakage/Missing","expected":"No broken, chipped, or missing tiles. Full coverage inspection"},
-  {"sl":78,"room":"Guest Bathroom","desc":"Tiles - Evenness/Level","expected":"Flush surface, no lippage (max 1mm difference). Use level tool"},
-  {"sl":79,"room":"Guest Bathroom","desc":"Tiles - Cement Gaps","expected":"Uniform grouting, max 3mm gap. Check color uniformity"},
-  {"sl":80,"room":"Guest Bathroom","desc":"Wash Basin - Fixing & Stability","expected":"Firm fixing, no movement or flexing. Apply pressure test"},
-  {"sl":81,"room":"Guest Bathroom","desc":"Wash Basin - Leakage Test","expected":"No leaks from pipes or connections. Run water for 3 minutes"},
-  {"sl":82,"room":"Guest Bathroom","desc":"Wash Basin - Blockage","expected":"Free water flow, no blockage. Test drain with full water"},
-  {"sl":83,"room":"Guest Bathroom","desc":"Granite - Fixing & Stability","expected":"Firm fixing, no movement, no cracks. Check all connection points"},
-  {"sl":84,"room":"Guest Bathroom","desc":"Commode - Fixing","expected":"Firm fixing to floor, no movement. Apply pressure test"},
-  {"sl":85,"room":"Guest Bathroom","desc":"Commode - Blockage","expected":"Free flow, no blockage, smooth operation. Test flush mechanism"},
-  {"sl":86,"room":"Guest Bathroom","desc":"Commode - Leakage","expected":"No leaks at base or connections. Check after multiple flushes"},
-  {"sl":87,"room":"Guest Bathroom","desc":"Commode - Scratches/Condition","expected":"Clean, no cracks or scratches on porcelain. Visual inspection"},
-  {"sl":88,"room":"Guest Bathroom","desc":"Bathroom - Slope/Drainage","expected":"Proper slope for drainage, no water pooling. Check with water test"},
-  {"sl":89,"room":"Guest Bathroom","desc":"Bathroom - Leaks/Dampness","expected":"No seepage, no damp spots on walls/ceiling. Check all corners"},
-  {"sl":90,"room":"Guest Bathroom","desc":"Bathroom - False Ceiling","expected":"Proper fixing, no sagging or damage. Check alignment"},
-  {"sl":91,"room":"Guest Bathroom","desc":"Bathroom - Light Fixture","expected":"Functional, proper brightness, no flickering. Test ON/OFF"},
-  {"sl":92,"room":"Guest Bathroom","desc":"Mirror - Fixing & Condition","expected":"Firm fixing, no cracks or spots. Visual inspection"},
-  {"sl":93,"room":"Guest Bathroom","desc":"Ventilation - Exhaust Fan","expected":"Functional, proper suction, quiet operation. Test for 2 minutes"},
-  {"sl":94,"room":"Guest Bathroom","desc":"Geyser - Leakage","expected":"No leaks at connections or tank. Inspect for 5 minutes"},
-  {"sl":95,"room":"Guest Bathroom","desc":"Geyser - Working Condition","expected":"Heats water within 3-5 minutes. Test temperature"},
-  {"sl":96,"room":"Guest Bathroom","desc":"Geyser - Switch/Control","expected":"Switch works smoothly, thermostat functions. Test heating control"},
-  {"sl":97,"room":"Guest Bathroom","desc":"Bathroom - Overall Cleanliness","expected":"Clean, no debris or loose material. Final visual check"},
-  {"sl":98,"room":"Guest Bathroom","desc":"Bathroom - Taps/Faucets","expected":"All taps functional, smooth operation, no leaks. Test all taps"},
-  {"sl":99,"room":"Guest Bathroom","desc":"Bathroom Door - Lock/Condition","expected":"Smooth operation, secure lock, no damage. Test lock mechanism"},
-  {"sl":100,"room":"Kids Room","desc":"Door - Scratches/Paint","expected":"Clean finish, no paint drips or marks. Inspect entire door surface"},
-  {"sl":101,"room":"Kids Room","desc":"Door - Gap/Alignment","expected":"Max 3mm gap, door aligned properly. Check all sides"},
-  {"sl":102,"room":"Kids Room","desc":"Window - Smoothness/Open-Close","expected":"Smooth operation, glides without resistance. Test 10+ times"},
-  {"sl":103,"room":"Kids Room","desc":"Window - Locks","expected":"Smooth locking/unlocking, secure hold. Test lock mechanism"},
-  {"sl":104,"room":"Kids Room","desc":"Window Frame - Scratches/Bend/Paint","expected":"No scratches, uniform color, no bending. Inspect all frame edges"},
-  {"sl":105,"room":"Kids Room","desc":"Window Glass - Cracks/Defects","expected":"No cracks, chips, or scratches. Check against light"},
-  {"sl":106,"room":"Kids Room","desc":"Paint - Double Coat Application","expected":"Even coating, no patchy areas, correct color"},
-  {"sl":107,"room":"Kids Room","desc":"Ceiling - Paint/Double Coat","expected":"Even coating, no patchy areas, correct color. Inspect entire ceiling"},
-  {"sl":108,"room":"Common Bathroom","desc":"Tiles - Breakage/Missing","expected":"No broken, chipped, or missing tiles. Full coverage inspection"},
-  {"sl":109,"room":"Common Bathroom","desc":"Tiles - Evenness/Level","expected":"Flush surface, no lippage (max 1mm difference). Use level tool"},
-  {"sl":110,"room":"Common Bathroom","desc":"Tiles - Cement Gaps","expected":"Uniform grouting, max 3mm gap. Check color uniformity"},
-  {"sl":111,"room":"Common Bathroom","desc":"Wash Basin - Fixing & Stability","expected":"Firm fixing, no movement or flexing. Apply pressure test"},
-  {"sl":112,"room":"Common Bathroom","desc":"Wash Basin - Leakage Test","expected":"No leaks from pipes or connections. Run water for 3 minutes"},
-  {"sl":113,"room":"Common Bathroom","desc":"Wash Basin - Blockage","expected":"Free water flow, no blockage. Test drain with full water"},
-  {"sl":114,"room":"Common Bathroom","desc":"Granite - Fixing & Stability","expected":"Firm fixing, no movement, no cracks. Check all connection points"},
-  {"sl":115,"room":"Common Bathroom","desc":"Commode - Fixing","expected":"Firm fixing to floor, no movement. Apply pressure test"},
-  {"sl":116,"room":"Common Bathroom","desc":"Commode - Blockage","expected":"Free flow, no blockage, smooth operation. Test flush mechanism"},
-  {"sl":117,"room":"Common Bathroom","desc":"Commode - Leakage","expected":"No leaks at base or connections. Check after multiple flushes"},
-  {"sl":118,"room":"Common Bathroom","desc":"Commode - Scratches/Condition","expected":"Clean, no cracks or scratches on porcelain. Visual inspection"},
-  {"sl":119,"room":"Common Bathroom","desc":"Bathroom - Slope/Drainage","expected":"Proper slope for drainage, no water pooling. Check with water test"},
-  {"sl":120,"room":"Common Bathroom","desc":"Bathroom - Leaks/Dampness","expected":"No seepage, no damp spots on walls/ceiling. Check all corners"},
-  {"sl":121,"room":"Common Bathroom","desc":"Bathroom - False Ceiling","expected":"Proper fixing, no sagging or damage. Check alignment"},
-  {"sl":122,"room":"Common Bathroom","desc":"Bathroom - Light Fixture","expected":"Functional, proper brightness, no flickering. Test ON/OFF"},
-  {"sl":123,"room":"Common Bathroom","desc":"Geyser - Leakage","expected":"No leaks at connections or tank. Inspect for 5 minutes"},
-  {"sl":124,"room":"Common Bathroom","desc":"Geyser - Working Condition","expected":"Heats water within 3-5 minutes. Test temperature"},
-  {"sl":125,"room":"Common Bathroom","desc":"Geyser - Switch/Control","expected":"Switch works smoothly, thermostat functions. Test heating control"},
-  {"sl":126,"room":"Common Bathroom","desc":"Bathroom - Overall Cleanliness","expected":"Clean, no debris or loose material. Final visual check"},
-  {"sl":127,"room":"Common Bathroom","desc":"Bathroom - Taps/Faucets","expected":"All taps functional, smooth operation, no leaks. Test all taps"},
-  {"sl":128,"room":"General","desc":"Plaster Work - Around Switches","expected":"Smooth finish, no cracks, proper alignment. Inspect all switch boxes"},
-  {"sl":129,"room":"General","desc":"Grouting of Tiles - Overall","expected":"Uniform color, no gaps or cracks. Check all tiled areas"},
-  {"sl":130,"room":"General","desc":"Keys - Complete Set","expected":"All keys present and functional. Test each key in locks"},
-  {"sl":131,"room":"General","desc":"Floors - General Cleanliness","expected":"Clean, no debris, dust-free. Thorough visual inspection"},
-  {"sl":132,"room":"General","desc":"Skirting Tiles - Fixing","expected":"Firm fixing, no damage or gaps. Check all skirting edges"},
-  {"sl":133,"room":"General","desc":"Hollow Spots - Tiles/Plaster","expected":"No hollow sounds when tapped. Tap test all areas"},
-  {"sl":134,"room":"General","desc":"Door Stoppers - Functionality","expected":"All stoppers present and functional. Check all doors"},
-  {"sl":135,"room":"General","desc":"Car Park/Common Area","expected":"Clean, proper markings, no damage. Visual inspection"},
-  {"sl":136,"room":"Kids Bathroom","desc":"Tiles - Breakage/Missing","expected":"No broken, chipped, or missing tiles. Full coverage inspection"},
-  {"sl":137,"room":"Kids Bathroom","desc":"Tiles - Evenness/Level","expected":"Flush surface, no lippage (max 1mm difference). Use level tool"},
-  {"sl":138,"room":"Kids Bathroom","desc":"Wash Basin - Fixing & Stability","expected":"Firm fixing, no movement or flexing. Apply pressure test"},
-  {"sl":139,"room":"Kids Bathroom","desc":"Commode - Fixing & Condition","expected":"Firm fixing to floor, no movement, no scratches. Apply pressure test"},
-  {"sl":140,"room":"Kids Bathroom","desc":"Bathroom - Slope/Drainage","expected":"Proper slope for drainage, no water pooling. Check with water test"},
-  {"sl":141,"room":"Kids Bathroom","desc":"Ventilation - Exhaust Fan","expected":"Functional, proper suction, quiet operation. Test for 2 minutes"},
-  {"sl":142,"room":"Kids Bathroom","desc":"Geyser - Leakage & Condition","expected":"No leaks at connections or tank. Inspect for 5 minutes"},
-  {"sl":143,"room":"Kids Bathroom","desc":"Bathroom - Taps/Faucets","expected":"All taps functional, smooth operation, no leaks. Test all taps"},
-  {"sl":144,"room":"Maid Room","desc":"Door - Scratches/Paint","expected":"Clean finish, no paint drips or marks. Inspect entire door surface"},
-  {"sl":145,"room":"Maid Room","desc":"Door - Gap/Alignment","expected":"Max 3mm gap, door aligned properly. Check all sides"},
-  {"sl":146,"room":"Maid Room","desc":"Flooring - Tiles","expected":"No broken or chipped tiles, even surface. Full coverage inspection"},
-  {"sl":147,"room":"Maid Room","desc":"Paint - Walls & Ceiling","expected":"Even coating, no patchy areas, correct color. Inspect all surfaces"},
-  {"sl":148,"room":"Maid Room","desc":"Electrical - Switches & Sockets","expected":"All switches functional and secure. Test each switch"},
-  {"sl":149,"room":"Maid Room","desc":"Ventilation / Window","expected":"Proper ventilation, window opens/closes smoothly. Test mechanism"},
-  {"sl":150,"room":"Maid Bathroom","desc":"Tiles - Breakage/Missing","expected":"No broken, chipped, or missing tiles. Full coverage inspection"},
-  {"sl":151,"room":"Maid Bathroom","desc":"Tiles - Evenness/Level","expected":"Flush surface, no lippage (max 1mm difference). Use level tool"},
-  {"sl":152,"room":"Maid Bathroom","desc":"Wash Basin - Fixing & Stability","expected":"Firm fixing, no movement or flexing. Apply pressure test"},
-  {"sl":153,"room":"Maid Bathroom","desc":"Commode - Fixing & Condition","expected":"Firm fixing to floor, no movement, no scratches. Apply pressure test"},
-  {"sl":154,"room":"Maid Bathroom","desc":"Bathroom - Slope/Drainage","expected":"Proper slope for drainage, no water pooling. Check with water test"},
-  {"sl":155,"room":"Maid Bathroom","desc":"Ventilation - Exhaust Fan","expected":"Functional, proper suction, quiet operation. Test for 2 minutes"},
-  {"sl":156,"room":"Maid Bathroom","desc":"Geyser - Leakage & Condition","expected":"No leaks at connections or tank. Inspect for 5 minutes"},
-  {"sl":157,"room":"Maid Bathroom","desc":"Bathroom - Taps/Faucets","expected":"All taps functional, smooth operation, no leaks. Test all taps"}
+  { "sl": 1, "room": "Drawing Room", "desc": "Main Door - Polish & Finish", "expected": "Smooth finish, no scratches, uniform gloss" },
+  { "sl": 2, "room": "Drawing Room", "desc": "Main Door - Surface Scratches", "expected": "No visible scratches or marks. Inspect under different lighting" },
+  { "sl": 3, "room": "Drawing Room", "desc": "Main Door - Frame & Wall Gap", "expected": "Max 2mm gap, uniform on all sides. Check with 2mm gauge" },
+  { "sl": 4, "room": "Drawing Room", "desc": "Main Door - Locks & Latches", "expected": "Smooth operation, no grinding, secure locking. Test 5+ cycles" },
+  { "sl": 5, "room": "Drawing Room", "desc": "Main Door - Open/Close Smoothness", "expected": "Smooth hinges, no friction, 90° opening. Check all hinges" },
+  { "sl": 6, "room": "Drawing Room", "desc": "Paint - Double Coat Application", "expected": "Even coating, no patchy areas, correct color" },
+  { "sl": 7, "room": "Drawing Room", "desc": "Tiles - Breakage/Missing", "expected": "No broken, chipped, or missing tiles. Full coverage inspection" },
+  { "sl": 8, "room": "Drawing Room", "desc": "Tile Fixing - Gaps/Hollowness", "expected": "No hollow sound, all tiles firmly fixed. Tap test each tile" },
+  { "sl": 9, "room": "Drawing Room", "desc": "Tiles - Cement Gaps", "expected": "Uniform grouting, max 3mm gap. Check color uniformity" },
+  { "sl": 10, "room": "Drawing Room", "desc": "Tiles - Evenness/Level", "expected": "Flush surface, no lippage (max 1mm difference). Use level tool" },
+  { "sl": 11, "room": "Drawing Room", "desc": "Plug Points - Functionality", "expected": "All outlets functional, earthing proper. Test with multimeter" },
+  { "sl": 12, "room": "Drawing Room", "desc": "MCB Panel - Switch Function", "expected": "All switches toggle smoothly, no loose connections. Test each circuit" },
+  { "sl": 13, "room": "Drawing Room", "desc": "Sliding Door - Smoothness", "expected": "Smooth gliding, no grinding, aligned properly. Test 10+ cycles" },
+  { "sl": 14, "room": "Drawing Room", "desc": "Sliding Door - Frame - Scratches/Paint", "expected": "Clean finish, no paint drips, uniform color" },
+  { "sl": 15, "room": "Drawing Room", "desc": "Sliding Door - Frame - Wall Gaps", "expected": "Max 2mm gap, no cracks around frame. Check all corners" },
+  { "sl": 16, "room": "Drawing Room", "desc": "Sliding Door - Glass - Cracks/Defects", "expected": "No cracks, chips, or scratches on glass. Check against light" },
+  { "sl": 17, "room": "Drawing Room", "desc": "Sliding Door - Lock Mechanism", "expected": "Smooth locking/unlocking, secure hold. Test locking action" },
+  { "sl": 18, "room": "Drawing Room", "desc": "Balcony Floor – Tiles/Railing", "expected": "Tiles intact, correct slope outwards, railing firm & rust‑free, shake railing gently" },
+  { "sl": 19, "room": "Drawing Room", "desc": "Balcony Drain – Water Flow", "expected": "No choking; water drains within 2–3 minutes, Pour bucket of water and observe flow" },
+  { "sl": 20, "room": "Kitchen", "desc": "Tiles - Breakage/Missing", "expected": "No broken, chipped, or missing tiles. Full coverage inspection" },
+  { "sl": 21, "room": "Kitchen", "desc": "Tiles - Gaps/Hollowness", "expected": "No hollow sound, all tiles firmly fixed. Tap test on all surfaces" },
+  { "sl": 22, "room": "Kitchen", "desc": "Tiles - Cement Gaps", "expected": "Uniform grouting, max 3mm gap, even color. Check color uniformity" },
+  { "sl": 23, "room": "Kitchen", "desc": "Paint - Double Coat", "expected": "Even coating, no patchy areas, correct color. Inspect all walls" },
+  { "sl": 24, "room": "Kitchen", "desc": "Plug Points - Functionality", "expected": "All outlets functional, earthing proper. Test with multimeter" },
+  { "sl": 25, "room": "Kitchen", "desc": "Water Flow - Sink/Washing Area", "expected": "Good water pressure, no fluctuation. Check for 2 minutes" },
+  { "sl": 26, "room": "Kitchen", "desc": "Utility Door - Scratches/Paint Issues", "expected": "Clean finish, no paint drips. Check glass and frame" },
+  { "sl": 27, "room": "Kitchen", "desc": "Utility Door - Smoothness", "expected": "Smooth operation, no sticking. Test open/close multiple times" },
+  { "sl": 28, "room": "Kitchen", "desc": "Utility Door - Locks", "expected": "Smooth locking/unlocking, secure hold. Test lock mechanism" },
+  { "sl": 29, "room": "Kitchen", "desc": "Utility Door - Glass Condition", "expected": "No cracks, chips, or scratches. Check against light" },
+  { "sl": 30, "room": "Kitchen", "desc": "Utility Floor – Tiles/Railing", "expected": "Tiles intact, correct slope outwards, railing firm & rust‑free, shake railing gently" },
+  { "sl": 31, "room": "Kitchen", "desc": "Utility Drain – Water Flow", "expected": "No choking; water drains within 2–3 minutes, Pour bucket of water and observe flow" },
+  { "sl": 32, "room": "Kitchen", "desc": "Utility External Wall – Paint and Cracks", "expected": "Even coating, no patchy areas, correct color. Inspect all walls" },
+  { "sl": 33, "room": "Kitchen", "desc": "Sink - Fixing & Stability", "expected": "Firm fixing, no movement or flexing. Apply downward pressure" },
+  { "sl": 34, "room": "Kitchen", "desc": "Sink - Cement Gaps", "expected": "No gaps around edges, proper sealing. Check all edges" },
+  { "sl": 35, "room": "Kitchen", "desc": "Sink - Leakage Test", "expected": "No leaks after 5-minute water run. Fill sink completely" },
+  { "sl": 36, "room": "Kitchen", "desc": "Sink - Drain Blockage", "expected": "Free flow of water, no blockage. Pour water at full pressure" },
+  { "sl": 37, "room": "Master Bedroom", "desc": "Door - Scratches/Paint", "expected": "Clean finish, no paint drips or marks. Inspect entire door surface" },
+  { "sl": 38, "room": "Master Bedroom", "desc": "Door - Gap/Alignment", "expected": "Max 3mm gap, door aligned properly. Check all sides" },
+  { "sl": 39, "room": "Master Bedroom", "desc": "Ceiling - Paint/Double Coat", "expected": "Even coating, no patchy areas, correct color. Inspect entire ceiling" },
+  { "sl": 40, "room": "Master Bedroom", "desc": "Paint - Double Coat Application", "expected": "Even coating, no patchy areas, correct color" },
+  { "sl": 41, "room": "Master Bedroom", "desc": "Balcony Door - Smoothness/Open-Close", "expected": "Smooth operation, glides without resistance. Test 10+ times" },
+  { "sl": 42, "room": "Master Bedroom", "desc": "Balcony Door - Locks", "expected": "Smooth locking/unlocking, secure hold. Test lock mechanism" },
+  { "sl": 43, "room": "Master Bedroom", "desc": "Balcony Door Frame - Scratches/Bend", "expected": "No scratches, uniform color, no bending. Inspect all frame edges" },
+  { "sl": 44, "room": "Master Bedroom", "desc": "Balcony Door Glass - Cracks/Defects", "expected": "No cracks, chips, or scratches. Check against light" },
+  { "sl": 45, "room": "Master Bedroom", "desc": "Balcony Floor – Tiles/Railing", "expected": "Tiles intact, correct slope outwards, railing firm & rust‑free, shake railing gently" },
+  { "sl": 46, "room": "Master Bedroom", "desc": "Balcony Drain – Water Flow", "expected": "No choking; water drains within 2–3 minutes, Pour bucket of water and observe flow" },
+  { "sl": 47, "room": "Master Bathroom", "desc": "Tiles - Breakage/Missing", "expected": "No broken, chipped, or missing tiles. Full coverage inspection" },
+  { "sl": 48, "room": "Master Bathroom", "desc": "Tiles - Evenness/Level", "expected": "Flush surface, no lippage (max 1mm difference). Use level tool" },
+  { "sl": 49, "room": "Master Bathroom", "desc": "Tiles - Cement Gaps", "expected": "Uniform grouting, max 3mm gap. Check color uniformity" },
+  { "sl": 50, "room": "Master Bathroom", "desc": "Wash Basin - Fixing & Stability", "expected": "Firm fixing, no movement or flexing. Apply pressure test" },
+  { "sl": 51, "room": "Master Bathroom", "desc": "Wash Basin - Leakage Test", "expected": "No leaks from pipes or connections. Run water for 3 minutes" },
+  { "sl": 52, "room": "Master Bathroom", "desc": "Wash Basin - Blockage", "expected": "Free water flow, no blockage. Test drain with full water" },
+  { "sl": 53, "room": "Master Bathroom", "desc": "Granite - Fixing & Stability", "expected": "Firm fixing, no movement, no cracks. Check all connection points" },
+  { "sl": 54, "room": "Master Bathroom", "desc": "Commode - Fixing", "expected": "Firm fixing to floor, no movement. Apply pressure test" },
+  { "sl": 55, "room": "Master Bathroom", "desc": "Commode - Blockage", "expected": "Free flow, no blockage, smooth operation. Test flush mechanism" },
+  { "sl": 56, "room": "Master Bathroom", "desc": "Commode - Leakage", "expected": "No leaks at base or connections. Check after multiple flushes" },
+  { "sl": 57, "room": "Master Bathroom", "desc": "Commode - Scratches/Condition", "expected": "Clean, no cracks or scratches on porcelain. Visual inspection" },
+  { "sl": 58, "room": "Master Bathroom", "desc": "Bathroom - Slope/Drainage", "expected": "Proper slope for drainage, no water pooling. Check with water test" },
+  { "sl": 59, "room": "Master Bathroom", "desc": "Bathroom - Leaks/Dampness", "expected": "No seepage, no damp spots on walls/ceiling. Check all corners" },
+  { "sl": 60, "room": "Master Bathroom", "desc": "Bathroom - False Ceiling", "expected": "Proper fixing, no sagging or damage. Check alignment" },
+  { "sl": 61, "room": "Master Bathroom", "desc": "Bathroom - Light Fixture", "expected": "Functional, proper brightness, no flickering. Test ON/OFF" },
+  { "sl": 62, "room": "Master Bathroom", "desc": "Ventilation - Exhaust Fan", "expected": "Functional, proper suction, quiet operation. Test for 2 minutes" },
+  { "sl": 63, "room": "Master Bathroom", "desc": "Geyser - Leakage", "expected": "No leaks at connections or tank. Inspect for 5 minutes" },
+  { "sl": 64, "room": "Master Bathroom", "desc": "Geyser - Working Condition", "expected": "Heats water within 3-5 minutes. Test temperature" },
+  { "sl": 65, "room": "Master Bathroom", "desc": "Geyser - Switch/Control", "expected": "Switch works smoothly, thermostat functions. Test heating control" },
+  { "sl": 66, "room": "Master Bathroom", "desc": "Bathroom - Overall Cleanliness", "expected": "Clean, no debris or loose material. Final visual check" },
+  { "sl": 67, "room": "Master Bathroom", "desc": "Bathroom - Taps/Faucets", "expected": "All taps functional, smooth operation, no leaks. Test all taps" },
+  { "sl": 68, "room": "Master Bathroom", "desc": "Bathroom Door - Lock/Condition", "expected": "Smooth operation, secure lock, no damage. Test lock mechanism" },
+  { "sl": 69, "room": "Guest Bedroom", "desc": "Door - Scratches/Paint", "expected": "Clean finish, no paint drips or marks. Inspect entire door surface" },
+  { "sl": 70, "room": "Guest Bedroom", "desc": "Door - Gap/Alignment", "expected": "Max 3mm gap, door aligned properly. Check all sides" },
+  { "sl": 71, "room": "Guest Bedroom", "desc": "Ceiling - Paint/Double Coat", "expected": "Even coating, no patchy areas, correct color. Inspect entire ceiling" },
+  { "sl": 72, "room": "Guest Bedroom", "desc": "Paint - Double Coat Application", "expected": "Even coating, no patchy areas, correct color" },
+  { "sl": 73, "room": "Guest Bedroom", "desc": "Window - Smoothness/Open-Close", "expected": "Smooth operation, glides without resistance. Test 10+ times" },
+  { "sl": 74, "room": "Guest Bedroom", "desc": "Window - Locks", "expected": "Smooth locking/unlocking, secure hold. Test lock mechanism" },
+  { "sl": 75, "room": "Guest Bedroom", "desc": "Window Frame - Scratches/Bend/Paint", "expected": "No scratches, uniform color, no bending. Inspect all frame edges" },
+  { "sl": 76, "room": "Guest Bedroom", "desc": "Window Glass - Cracks/Defects", "expected": "No cracks, chips, or scratches. Check against light" },
+  { "sl": 77, "room": "Guest Bathroom", "desc": "Tiles - Breakage/Missing", "expected": "No broken, chipped, or missing tiles. Full coverage inspection" },
+  { "sl": 78, "room": "Guest Bathroom", "desc": "Tiles - Evenness/Level", "expected": "Flush surface, no lippage (max 1mm difference). Use level tool" },
+  { "sl": 79, "room": "Guest Bathroom", "desc": "Tiles - Cement Gaps", "expected": "Uniform grouting, max 3mm gap. Check color uniformity" },
+  { "sl": 80, "room": "Guest Bathroom", "desc": "Wash Basin - Fixing & Stability", "expected": "Firm fixing, no movement or flexing. Apply pressure test" },
+  { "sl": 81, "room": "Guest Bathroom", "desc": "Wash Basin - Leakage Test", "expected": "No leaks from pipes or connections. Run water for 3 minutes" },
+  { "sl": 82, "room": "Guest Bathroom", "desc": "Wash Basin - Blockage", "expected": "Free water flow, no blockage. Test drain with full water" },
+  { "sl": 83, "room": "Guest Bathroom", "desc": "Granite - Fixing & Stability", "expected": "Firm fixing, no movement, no cracks. Check all connection points" },
+  { "sl": 84, "room": "Guest Bathroom", "desc": "Commode - Fixing", "expected": "Firm fixing to floor, no movement. Apply pressure test" },
+  { "sl": 85, "room": "Guest Bathroom", "desc": "Commode - Blockage", "expected": "Free flow, no blockage, smooth operation. Test flush mechanism" },
+  { "sl": 86, "room": "Guest Bathroom", "desc": "Commode - Leakage", "expected": "No leaks at base or connections. Check after multiple flushes" },
+  { "sl": 87, "room": "Guest Bathroom", "desc": "Commode - Scratches/Condition", "expected": "Clean, no cracks or scratches on porcelain. Visual inspection" },
+  { "sl": 88, "room": "Guest Bathroom", "desc": "Bathroom - Slope/Drainage", "expected": "Proper slope for drainage, no water pooling. Check with water test" },
+  { "sl": 89, "room": "Guest Bathroom", "desc": "Bathroom - Leaks/Dampness", "expected": "No seepage, no damp spots on walls/ceiling. Check all corners" },
+  { "sl": 90, "room": "Guest Bathroom", "desc": "Bathroom - False Ceiling", "expected": "Proper fixing, no sagging or damage. Check alignment" },
+  { "sl": 91, "room": "Guest Bathroom", "desc": "Bathroom - Light Fixture", "expected": "Functional, proper brightness, no flickering. Test ON/OFF" },
+  { "sl": 92, "room": "Guest Bathroom", "desc": "Mirror - Fixing & Condition", "expected": "Firm fixing, no cracks or spots. Visual inspection" },
+  { "sl": 93, "room": "Guest Bathroom", "desc": "Ventilation - Exhaust Fan", "expected": "Functional, proper suction, quiet operation. Test for 2 minutes" },
+  { "sl": 94, "room": "Guest Bathroom", "desc": "Geyser - Leakage", "expected": "No leaks at connections or tank. Inspect for 5 minutes" },
+  { "sl": 95, "room": "Guest Bathroom", "desc": "Geyser - Working Condition", "expected": "Heats water within 3-5 minutes. Test temperature" },
+  { "sl": 96, "room": "Guest Bathroom", "desc": "Geyser - Switch/Control", "expected": "Switch works smoothly, thermostat functions. Test heating control" },
+  { "sl": 97, "room": "Guest Bathroom", "desc": "Bathroom - Overall Cleanliness", "expected": "Clean, no debris or loose material. Final visual check" },
+  { "sl": 98, "room": "Guest Bathroom", "desc": "Bathroom - Taps/Faucets", "expected": "All taps functional, smooth operation, no leaks. Test all taps" },
+  { "sl": 99, "room": "Guest Bathroom", "desc": "Bathroom Door - Lock/Condition", "expected": "Smooth operation, secure lock, no damage. Test lock mechanism" },
+  { "sl": 100, "room": "Kids Room", "desc": "Door - Scratches/Paint", "expected": "Clean finish, no paint drips or marks. Inspect entire door surface" },
+  { "sl": 101, "room": "Kids Room", "desc": "Door - Gap/Alignment", "expected": "Max 3mm gap, door aligned properly. Check all sides" },
+  { "sl": 102, "room": "Kids Room", "desc": "Window - Smoothness/Open-Close", "expected": "Smooth operation, glides without resistance. Test 10+ times" },
+  { "sl": 103, "room": "Kids Room", "desc": "Window - Locks", "expected": "Smooth locking/unlocking, secure hold. Test lock mechanism" },
+  { "sl": 104, "room": "Kids Room", "desc": "Window Frame - Scratches/Bend/Paint", "expected": "No scratches, uniform color, no bending. Inspect all frame edges" },
+  { "sl": 105, "room": "Kids Room", "desc": "Window Glass - Cracks/Defects", "expected": "No cracks, chips, or scratches. Check against light" },
+  { "sl": 106, "room": "Kids Room", "desc": "Paint - Double Coat Application", "expected": "Even coating, no patchy areas, correct color" },
+  { "sl": 107, "room": "Kids Room", "desc": "Ceiling - Paint/Double Coat", "expected": "Even coating, no patchy areas, correct color. Inspect entire ceiling" },
+  { "sl": 108, "room": "Common Bathroom", "desc": "Tiles - Breakage/Missing", "expected": "No broken, chipped, or missing tiles. Full coverage inspection" },
+  { "sl": 109, "room": "Common Bathroom", "desc": "Tiles - Evenness/Level", "expected": "Flush surface, no lippage (max 1mm difference). Use level tool" },
+  { "sl": 110, "room": "Common Bathroom", "desc": "Tiles - Cement Gaps", "expected": "Uniform grouting, max 3mm gap. Check color uniformity" },
+  { "sl": 111, "room": "Common Bathroom", "desc": "Wash Basin - Fixing & Stability", "expected": "Firm fixing, no movement or flexing. Apply pressure test" },
+  { "sl": 112, "room": "Common Bathroom", "desc": "Wash Basin - Leakage Test", "expected": "No leaks from pipes or connections. Run water for 3 minutes" },
+  { "sl": 113, "room": "Common Bathroom", "desc": "Wash Basin - Blockage", "expected": "Free water flow, no blockage. Test drain with full water" },
+  { "sl": 114, "room": "Common Bathroom", "desc": "Granite - Fixing & Stability", "expected": "Firm fixing, no movement, no cracks. Check all connection points" },
+  { "sl": 115, "room": "Common Bathroom", "desc": "Commode - Fixing", "expected": "Firm fixing to floor, no movement. Apply pressure test" },
+  { "sl": 116, "room": "Common Bathroom", "desc": "Commode - Blockage", "expected": "Free flow, no blockage, smooth operation. Test flush mechanism" },
+  { "sl": 117, "room": "Common Bathroom", "desc": "Commode - Leakage", "expected": "No leaks at base or connections. Check after multiple flushes" },
+  { "sl": 118, "room": "Common Bathroom", "desc": "Commode - Scratches/Condition", "expected": "Clean, no cracks or scratches on porcelain. Visual inspection" },
+  { "sl": 119, "room": "Common Bathroom", "desc": "Bathroom - Slope/Drainage", "expected": "Proper slope for drainage, no water pooling. Check with water test" },
+  { "sl": 120, "room": "Common Bathroom", "desc": "Bathroom - Leaks/Dampness", "expected": "No seepage, no damp spots on walls/ceiling. Check all corners" },
+  { "sl": 121, "room": "Common Bathroom", "desc": "Bathroom - False Ceiling", "expected": "Proper fixing, no sagging or damage. Check alignment" },
+  { "sl": 122, "room": "Common Bathroom", "desc": "Bathroom - Light Fixture", "expected": "Functional, proper brightness, no flickering. Test ON/OFF" },
+  { "sl": 123, "room": "Common Bathroom", "desc": "Geyser - Leakage", "expected": "No leaks at connections or tank. Inspect for 5 minutes" },
+  { "sl": 124, "room": "Common Bathroom", "desc": "Geyser - Working Condition", "expected": "Heats water within 3-5 minutes. Test temperature" },
+  { "sl": 125, "room": "Common Bathroom", "desc": "Geyser - Switch/Control", "expected": "Switch works smoothly, thermostat functions. Test heating control" },
+  { "sl": 126, "room": "Common Bathroom", "desc": "Bathroom - Overall Cleanliness", "expected": "Clean, no debris or loose material. Final visual check" },
+  { "sl": 127, "room": "Common Bathroom", "desc": "Bathroom - Taps/Faucets", "expected": "All taps functional, smooth operation, no leaks. Test all taps" },
+  { "sl": 128, "room": "General", "desc": "Plaster Work - Around Switches", "expected": "Smooth finish, no cracks, proper alignment. Inspect all switch boxes" },
+  { "sl": 129, "room": "General", "desc": "Grouting of Tiles - Overall", "expected": "Uniform color, no gaps or cracks. Check all tiled areas" },
+  { "sl": 130, "room": "General", "desc": "Keys - Complete Set", "expected": "All keys present and functional. Test each key in locks" },
+  { "sl": 131, "room": "General", "desc": "Floors - General Cleanliness", "expected": "Clean, no debris, dust-free. Thorough visual inspection" },
+  { "sl": 132, "room": "General", "desc": "Skirting Tiles - Fixing", "expected": "Firm fixing, no damage or gaps. Check all skirting edges" },
+  { "sl": 133, "room": "General", "desc": "Hollow Spots - Tiles/Plaster", "expected": "No hollow sounds when tapped. Tap test all areas" },
+  { "sl": 134, "room": "General", "desc": "Door Stoppers - Functionality", "expected": "All stoppers present and functional. Check all doors" },
+  { "sl": 135, "room": "General", "desc": "Car Park/Common Area", "expected": "Clean, proper markings, no damage. Visual inspection" },
+  { "sl": 136, "room": "Kids Bathroom", "desc": "Tiles - Breakage/Missing", "expected": "No broken, chipped, or missing tiles. Full coverage inspection" },
+  { "sl": 137, "room": "Kids Bathroom", "desc": "Tiles - Evenness/Level", "expected": "Flush surface, no lippage (max 1mm difference). Use level tool" },
+  { "sl": 138, "room": "Kids Bathroom", "desc": "Wash Basin - Fixing & Stability", "expected": "Firm fixing, no movement or flexing. Apply pressure test" },
+  { "sl": 139, "room": "Kids Bathroom", "desc": "Commode - Fixing & Condition", "expected": "Firm fixing to floor, no movement, no scratches. Apply pressure test" },
+  { "sl": 140, "room": "Kids Bathroom", "desc": "Bathroom - Slope/Drainage", "expected": "Proper slope for drainage, no water pooling. Check with water test" },
+  { "sl": 141, "room": "Kids Bathroom", "desc": "Ventilation - Exhaust Fan", "expected": "Functional, proper suction, quiet operation. Test for 2 minutes" },
+  { "sl": 142, "room": "Kids Bathroom", "desc": "Geyser - Leakage & Condition", "expected": "No leaks at connections or tank. Inspect for 5 minutes" },
+  { "sl": 143, "room": "Kids Bathroom", "desc": "Bathroom - Taps/Faucets", "expected": "All taps functional, smooth operation, no leaks. Test all taps" },
+  { "sl": 144, "room": "Maid Room", "desc": "Door - Scratches/Paint", "expected": "Clean finish, no paint drips or marks. Inspect entire door surface" },
+  { "sl": 145, "room": "Maid Room", "desc": "Door - Gap/Alignment", "expected": "Max 3mm gap, door aligned properly. Check all sides" },
+  { "sl": 146, "room": "Maid Room", "desc": "Flooring - Tiles", "expected": "No broken or chipped tiles, even surface. Full coverage inspection" },
+  { "sl": 147, "room": "Maid Room", "desc": "Paint - Walls & Ceiling", "expected": "Even coating, no patchy areas, correct color. Inspect all surfaces" },
+  { "sl": 148, "room": "Maid Room", "desc": "Electrical - Switches & Sockets", "expected": "All switches functional and secure. Test each switch" },
+  { "sl": 149, "room": "Maid Room", "desc": "Ventilation / Window", "expected": "Proper ventilation, window opens/closes smoothly. Test mechanism" },
+  { "sl": 150, "room": "Maid Bathroom", "desc": "Tiles - Breakage/Missing", "expected": "No broken, chipped, or missing tiles. Full coverage inspection" },
+  { "sl": 151, "room": "Maid Bathroom", "desc": "Tiles - Evenness/Level", "expected": "Flush surface, no lippage (max 1mm difference). Use level tool" },
+  { "sl": 152, "room": "Maid Bathroom", "desc": "Wash Basin - Fixing & Stability", "expected": "Firm fixing, no movement or flexing. Apply pressure test" },
+  { "sl": 153, "room": "Maid Bathroom", "desc": "Commode - Fixing & Condition", "expected": "Firm fixing to floor, no movement, no scratches. Apply pressure test" },
+  { "sl": 154, "room": "Maid Bathroom", "desc": "Bathroom - Slope/Drainage", "expected": "Proper slope for drainage, no water pooling. Check with water test" },
+  { "sl": 155, "room": "Maid Bathroom", "desc": "Ventilation - Exhaust Fan", "expected": "Functional, proper suction, quiet operation. Test for 2 minutes" },
+  { "sl": 156, "room": "Maid Bathroom", "desc": "Geyser - Leakage & Condition", "expected": "No leaks at connections or tank. Inspect for 5 minutes" },
+  { "sl": 157, "room": "Maid Bathroom", "desc": "Bathroom - Taps/Faucets", "expected": "All taps functional, smooth operation, no leaks. Test all taps" }
 ];
 
 const ROOM_ICONS = {
@@ -244,8 +244,8 @@ function CheckItem({ item, state, onUpdate, index }) {
   const [expanded, setExpanded] = useState(false);
   const statusColor =
     state.status === "pass" ? "#16a34a" :
-    state.status === "fail" ? "#dc2626" :
-    state.status === "na" ? "#71717a" : "#d4d4d8";
+      state.status === "fail" ? "#dc2626" :
+        state.status === "na" ? "#71717a" : "#d4d4d8";
 
   return (
     <div
@@ -528,9 +528,9 @@ function generateReportHTML(states, flatNumber, inspectionDate, enabledRooms) {
       const st = states[item.sl] || {};
       const statusLabel =
         st.status === "pass" ? '<span style="color:#16a34a;font-weight:700">✓ PASS</span>' :
-        st.status === "fail" ? '<span style="color:#dc2626;font-weight:700">✗ FAIL</span>' :
-        st.status === "na" ? '<span style="color:#71717a;font-weight:600">— N/A</span>' :
-        '<span style="color:#f59e0b;font-weight:600">⏳ Pending</span>';
+          st.status === "fail" ? '<span style="color:#dc2626;font-weight:700">✗ FAIL</span>' :
+            st.status === "na" ? '<span style="color:#71717a;font-weight:600">— N/A</span>' :
+              '<span style="color:#f59e0b;font-weight:600">⏳ Pending</span>';
 
       const rowBg = st.status === "fail" ? "#fff5f5" : "#fff";
       roomRows += `
@@ -643,6 +643,65 @@ function generateReportHTML(states, flatNumber, inspectionDate, enabledRooms) {
   </body></html>`;
 }
 
+// ── JSON Report Generator ──
+function generateReportJSON(states, flatNumber, inspectionDate, enabledRooms) {
+  const activeData = CHECKLIST_DATA.filter(i => enabledRooms.has(i.room));
+  const grouped = groupByRoom(activeData);
+  let totalPass = 0, totalFail = 0, totalNA = 0, totalPending = 0;
+
+  activeData.forEach(item => {
+    const s = states[item.sl]?.status;
+    if (s === "pass") totalPass++;
+    else if (s === "fail") totalFail++;
+    else if (s === "na") totalNA++;
+    else totalPending++;
+  });
+
+  const total = activeData.length;
+
+  const rooms = {};
+  ROOM_ORDER.filter(r => enabledRooms.has(r)).forEach(room => {
+    const items = grouped[room] || [];
+    if (!items.length) return;
+    rooms[room] = items.map(item => {
+      const st = states[item.sl] || {};
+      return {
+        sl: item.sl,
+        description: item.desc,
+        expected: item.expected,
+        status: st.status || "pending",
+        remarks: st.remarks || "",
+      };
+    });
+  });
+
+  const failedItems = activeData
+    .filter(i => states[i.sl]?.status === "fail")
+    .map(item => ({
+      sl: item.sl,
+      room: item.room,
+      description: item.desc,
+      remarks: states[item.sl]?.remarks || "",
+    }));
+
+  return {
+    reportTitle: "Flat Handover Inspection Report",
+    flatNumber: flatNumber || "",
+    inspectionDate: inspectionDate || new Date().toISOString().split("T")[0],
+    generatedAt: new Date().toISOString(),
+    summary: {
+      total,
+      passed: totalPass,
+      failed: totalFail,
+      notApplicable: totalNA,
+      pending: totalPending,
+      completionPercent: total > 0 ? Math.round(((total - totalPending) / total) * 100) : 0,
+    },
+    rooms,
+    failedItems,
+  };
+}
+
 // ── Report Modal ──
 function ReportModal({ onClose, states, enabledRooms }) {
   const [flatNumber, setFlatNumber] = useState("");
@@ -657,6 +716,21 @@ function ReportModal({ onClose, states, enabledRooms }) {
     const win = window.open("", "_blank");
     win.document.write(html);
     win.document.close();
+    onClose();
+  };
+
+  const handleExportJSON = () => {
+    const data = generateReportJSON(states, flatNumber, inspectionDate, enabledRooms);
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `flat-handover-report${flatNumber ? "-" + flatNumber.replace(/[^a-zA-Z0-9-_]/g, "_") : ""}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
     onClose();
   };
 
@@ -728,6 +802,24 @@ function ReportModal({ onClose, states, enabledRooms }) {
           }}
         >
           📄 View Report
+        </button>
+
+        <button
+          onClick={handleExportJSON}
+          style={{
+            width: "100%", marginTop: 10,
+            padding: "16px", borderRadius: 14,
+            border: "none", cursor: "pointer",
+            background: "linear-gradient(135deg, #059669, #047857)",
+            color: "#fff", fontSize: 15.5, fontWeight: 700,
+            letterSpacing: -0.2,
+            boxShadow: "0 4px 14px rgba(5,150,105,0.25)",
+            transition: "all 0.2s ease",
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+          }}
+        >
+          <span style={{ fontSize: 18 }}>{"{}"}</span>
+          Export as JSON
         </button>
 
         <button
@@ -838,6 +930,161 @@ function RoomConfigModal({ onClose, enabledRooms, setEnabledRooms }) {
   );
 }
 
+// ── Welcome Screen ──
+function WelcomeScreen({ onStartNew, onImport }) {
+  const importRef = useRef(null);
+
+  const steps = [
+    { icon: "🏠", title: "Select Rooms", desc: "Configure which rooms exist in your flat using the ⚙️ Rooms button" },
+    { icon: "📋", title: "Inspect Items", desc: "Tap each checklist item to expand, then mark as Pass, Fail, or N/A" },
+    { icon: "💬", title: "Add Remarks", desc: "Note down observations or issues for any item that needs attention" },
+    { icon: "📊", title: "Generate Report", desc: "Create a detailed HTML report or export data as JSON for sharing" },
+  ];
+
+  return (
+    <div style={{
+      minHeight: "100vh",
+      background: "linear-gradient(180deg, #18181b 0%, #1e1b4b 40%, #312e81 100%)",
+      fontFamily: "'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+      display: "flex", flexDirection: "column", alignItems: "center",
+      padding: "0 20px",
+      overflow: "auto",
+    }}>
+      <style>{`
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        @keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
+      `}</style>
+
+      {/* Hero */}
+      <div style={{
+        textAlign: "center", paddingTop: 72, paddingBottom: 8,
+        animation: "fadeInUp 0.6s ease both",
+      }}>
+        <div style={{
+          fontSize: 64, marginBottom: 16,
+          animation: "pulse 2.5s ease-in-out infinite",
+          filter: "drop-shadow(0 4px 20px rgba(167,139,250,0.4))",
+        }}>🏠</div>
+        <h1 style={{
+          margin: 0, fontSize: 28, fontWeight: 800,
+          color: "#fff", letterSpacing: -0.5, lineHeight: 1.2,
+        }}>
+          Flat Handover
+        </h1>
+        <p style={{
+          margin: "6px 0 0", fontSize: 15, color: "#a5b4fc",
+          fontWeight: 500, letterSpacing: 0.2,
+        }}>
+          Inspection Checklist
+        </p>
+      </div>
+
+      {/* Guide Steps */}
+      <div style={{
+        width: "100%", maxWidth: 400, marginTop: 36,
+        animation: "fadeInUp 0.6s ease 0.15s both",
+      }}>
+        <p style={{
+          fontSize: 11, fontWeight: 700, color: "#a78bfa",
+          textTransform: "uppercase", letterSpacing: 1.5,
+          marginBottom: 14, paddingLeft: 4,
+        }}>How it works</p>
+
+        {steps.map((step, i) => (
+          <div
+            key={i}
+            style={{
+              display: "flex", alignItems: "flex-start", gap: 14,
+              padding: "10px 4px", marginBottom: 4,
+              animation: `fadeInUp 0.5s ease ${0.2 + i * 0.08}s both`,
+            }}
+          >
+            <div style={{
+              width: 40, height: 40, borderRadius: 12,
+              background: "rgba(167,139,250,0.15)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 20, flexShrink: 0,
+            }}>{step.icon}</div>
+            <div>
+              <div style={{
+                fontWeight: 700, fontSize: 14, color: "#fff",
+                marginBottom: 3,
+              }}>
+                <span style={{
+                  color: "#a78bfa", fontSize: 12, fontWeight: 800, marginRight: 6,
+                }}>{i + 1}.</span>
+                {step.title}
+              </div>
+              <div style={{ fontSize: 12.5, color: "#94a3b8", lineHeight: 1.45 }}>
+                {step.desc}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Action Buttons */}
+      <div style={{
+        width: "100%", maxWidth: 400, marginTop: 32, paddingBottom: 48,
+        animation: "fadeInUp 0.6s ease 0.5s both",
+      }}>
+        <button
+          onClick={onStartNew}
+          style={{
+            width: "100%", padding: "18px 24px",
+            borderRadius: 16, border: "none", cursor: "pointer",
+            background: "linear-gradient(135deg, #7c3aed, #6d28d9, #5b21b6)",
+            backgroundSize: "200% auto",
+            color: "#fff", fontSize: 16, fontWeight: 700,
+            letterSpacing: -0.2,
+            boxShadow: "0 8px 32px rgba(124,58,237,0.4)",
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+            transition: "all 0.2s ease",
+            animation: "shimmer 3s linear infinite",
+          }}
+        >
+          <span style={{ fontSize: 20 }}>✨</span>
+          Start New Inspection
+        </button>
+
+        <input
+          ref={importRef}
+          type="file"
+          accept=".json,application/json"
+          style={{ display: "none" }}
+          onChange={onImport}
+        />
+        <button
+          onClick={() => importRef.current?.click()}
+          style={{
+            width: "100%", marginTop: 12, padding: "16px 24px",
+            borderRadius: 16, cursor: "pointer",
+            background: "rgba(255,255,255,0.06)",
+            border: "1.5px solid rgba(255,255,255,0.15)",
+            color: "#c4b5fd", fontSize: 15, fontWeight: 600,
+            letterSpacing: -0.2,
+            backdropFilter: "blur(8px)",
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+            transition: "all 0.2s ease",
+          }}
+        >
+          <span style={{ fontSize: 18 }}>📥</span>
+          Import Previous (JSON)
+        </button>
+
+        <p style={{
+          textAlign: "center", fontSize: 12, color: "#64748b",
+          marginTop: 20, lineHeight: 1.5,
+        }}>
+          Your progress is saved automatically in this browser tab.
+          <br />Export as JSON to back up or share your inspection.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // ── Main App ──
 export default function App() {
   const [states, setStates] = useState({});
@@ -846,7 +1093,10 @@ export default function App() {
   const [showReport, setShowReport] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
   const [filterMode, setFilterMode] = useState("all");
+  const [showWelcome, setShowWelcome] = useState(true);
+  const [importMessage, setImportMessage] = useState(null);
   const roomRefs = useRef({});
+  const fileInputRef = useRef(null);
   const grouped = groupByRoom(CHECKLIST_DATA);
 
   // Load saved state
@@ -855,20 +1105,18 @@ export default function App() {
       const saved = JSON.parse(window.name || "{}");
       if (saved && typeof saved === "object" && Object.keys(saved).length > 0) {
         if (saved.states) {
-          // New format
           setStates(saved.states);
           setEnabledRooms(new Set(saved.enabledRooms || [...DEFAULT_ENABLED_ROOMS]));
-        } else {
-          // Legacy format — just states object
+        } else if (Object.keys(saved).length > 0) {
           setStates(saved);
         }
       }
-    } catch {}
+    } catch { }
   }, []);
 
   // Save state
   useEffect(() => {
-    try { window.name = JSON.stringify({ states, enabledRooms: [...enabledRooms] }); } catch {}
+    try { window.name = JSON.stringify({ states, enabledRooms: [...enabledRooms] }); } catch { }
   }, [states, enabledRooms]);
 
   const updateItem = (sl, state) => {
@@ -880,12 +1128,64 @@ export default function App() {
     roomRefs.current[room]?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  const dismissWelcome = () => {
+    setShowWelcome(false);
+  };
+
+  const handleImportJSON = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const data = JSON.parse(evt.target.result);
+        if (!data.rooms || typeof data.rooms !== "object") {
+          alert("Invalid report file: missing rooms data.");
+          return;
+        }
+        const newStates = {};
+        Object.values(data.rooms).forEach(items => {
+          items.forEach(item => {
+            if (item.sl != null) {
+              newStates[item.sl] = {
+                status: item.status === "pending" ? undefined : item.status,
+                remarks: item.remarks || "",
+              };
+            }
+          });
+        });
+        setStates(newStates);
+
+        const importedRooms = Object.keys(data.rooms);
+        if (importedRooms.length > 0) {
+          setEnabledRooms(new Set(importedRooms));
+        }
+
+        dismissWelcome();
+        setImportMessage(`Imported successfully! ${Object.keys(newStates).length} items restored.`);
+      } catch (err) {
+        setImportMessage("Failed to import: " + err.message);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  };
+
   const activeData = CHECKLIST_DATA.filter(i => enabledRooms.has(i.room));
   const total = activeData.length;
   const completed = activeData.filter(i => states[i.sl]?.status).length;
   const passed = activeData.filter(i => states[i.sl]?.status === "pass").length;
   const failed = activeData.filter(i => states[i.sl]?.status === "fail").length;
   const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+  if (showWelcome) {
+    return (
+      <WelcomeScreen
+        onStartNew={dismissWelcome}
+        onImport={handleImportJSON}
+      />
+    );
+  }
 
   return (
     <div style={{
@@ -1013,10 +1313,28 @@ export default function App() {
             {f.label}
           </button>
         ))}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".json,application/json"
+          style={{ display: "none" }}
+          onChange={handleImportJSON}
+        />
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          style={{
+            marginLeft: "auto", padding: "6px 14px", borderRadius: 8,
+            border: "1.5px solid #e5e7eb", background: "#fff",
+            color: "#52525b", fontSize: 13, fontWeight: 600, cursor: "pointer",
+            display: "flex", alignItems: "center", gap: 5,
+          }}
+        >
+          📥 Import
+        </button>
         <button
           onClick={() => setShowConfig(true)}
           style={{
-            marginLeft: "auto", padding: "6px 14px", borderRadius: 8,
+            padding: "6px 14px", borderRadius: 8,
             border: "1.5px solid #e5e7eb", background: "#fff",
             color: "#52525b", fontSize: 13, fontWeight: 600, cursor: "pointer",
             display: "flex", alignItems: "center", gap: 5,
@@ -1096,6 +1414,52 @@ export default function App() {
           enabledRooms={enabledRooms}
           setEnabledRooms={setEnabledRooms}
         />
+      )}
+
+      {/* Import Message Popup */}
+      {importMessage && (
+        <div
+          onClick={() => setImportMessage(null)}
+          style={{
+            position: "fixed", inset: 0, zIndex: 1100,
+            background: "rgba(0,0,0,0.5)", backdropFilter: "blur(6px)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            animation: "fadeIn 0.2s ease",
+            padding: 20,
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: "#fff", borderRadius: 20,
+              padding: "32px 28px 24px", maxWidth: 340, width: "100%",
+              textAlign: "center",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
+              animation: "fadeSlideIn 0.3s ease",
+            }}
+          >
+            <div style={{ fontSize: 40, marginBottom: 12 }}>
+              {importMessage.startsWith("Failed") ? "⚠️" : "✅"}
+            </div>
+            <p style={{
+              margin: "0 0 20px", fontSize: 15, fontWeight: 600,
+              color: "#18181b", lineHeight: 1.5,
+            }}>
+              {importMessage}
+            </p>
+            <button
+              onClick={() => setImportMessage(null)}
+              style={{
+                width: "100%", padding: "14px", borderRadius: 12,
+                border: "none", cursor: "pointer",
+                background: "linear-gradient(135deg, #18181b, #3f3f46)",
+                color: "#fff", fontSize: 15, fontWeight: 700,
+              }}
+            >
+              OK
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
